@@ -23,8 +23,9 @@ Default timing is:
 
 These periods are controlled by `SimulationConditionGenerationPeriod`,
 `SimulationDataGenerationPeriod`, and `SimulationOPCUAPublishPeriod` in
-[`home/config.json`](../home/config.json). `SimulationSeed` makes a run
-repeatable.
+the runtime `home/config.json`. The tracked
+[`config/config.example.json`](../config/config.example.json) provides the
+initial values. `SimulationSeed` makes a run repeatable.
 
 ## OPC-UA addresses
 

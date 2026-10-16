@@ -17,9 +17,10 @@ server or WebApp.
 
 ## Configuration
 
-The shared [`home/config.json`](../home/config.json) supplies
-`GeneralBlackboard` and `LoopDuration`. The sink exits when its initial
-Blackboard connection cannot be established.
+The shared runtime `home/config.json` supplies `GeneralBlackboard` and
+`LoopDuration`. Start from
+[`config/config.example.json`](../config/config.example.json). The sink exits
+when its initial Blackboard connection cannot be established.
 
 ## Run locally
 

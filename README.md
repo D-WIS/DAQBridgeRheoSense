@@ -41,9 +41,12 @@ outputs constructed from the ten shear-stress values at 3, 6, 10, 20, 30, 60,
 
 ## Shared configuration
 
-The worker applications and WebApp use [`home/config.json`](home/config.json).
-In Linux containers it is located at `/home/config.json`; mount `/home` as a
-persistent volume. Important settings include:
+The worker applications and WebApp use the untracked runtime file
+`home/config.json`. In Linux containers it is located at `/home/config.json`;
+mount `/home` as a persistent volume. Copy
+[`config/config.example.json`](config/config.example.json) to
+`home/config.json` for an initial local configuration. Important settings
+include:
 
 - `OPCUAURL`: RheoSense OPC-UA endpoint, default
   `opc.tcp://localhost:48030`.
@@ -102,6 +105,8 @@ reads the 16 published buckets; raw buckets remain available for diagnostics.
 Prerequisites are the .NET 8 SDK and, for container builds, Docker.
 
 ```powershell
+New-Item -ItemType Directory -Force .\home | Out-Null
+Copy-Item .\config\config.example.json .\home\config.json
 dotnet restore .\DWIS.DAQBridge.RheoSense.sln
 dotnet build .\DWIS.DAQBridge.RheoSense.sln --no-restore
 dotnet test .\DWIS.DAQBridge.RheoSense.sln --no-build

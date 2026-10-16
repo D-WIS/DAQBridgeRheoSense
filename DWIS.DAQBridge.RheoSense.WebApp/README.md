@@ -45,8 +45,8 @@ state, and retries according to `ConnectionRetryInterval`.
 
 - `BasePath`: route prefix; default `/RheoSense/webapp`.
 - `UnitConversionHostURL`: host for the OSDC unit conversion API.
-- [`home/config.json`](../home/config.json): shared bridge and Blackboard
-  configuration.
+- Runtime `home/config.json`: shared bridge and Blackboard configuration. Start
+  from [`config/config.example.json`](../config/config.example.json).
 
 ## Run locally
 

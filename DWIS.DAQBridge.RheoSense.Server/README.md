@@ -26,8 +26,9 @@ and conversion rules.
 
 ## Configuration
 
-The worker reads `/home/config.json` in the Linux container. The repository's
-[`home/config.json`](../home/config.json) is a complete example.
+The worker reads `/home/config.json` in the Linux container. Copy the repository's
+[`config/config.example.json`](../config/config.example.json) to the untracked
+`home/config.json` path for local execution.
 
 Important settings include:
 
