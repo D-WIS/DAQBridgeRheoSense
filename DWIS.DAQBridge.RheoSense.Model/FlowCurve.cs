@@ -1,0 +1,147 @@
+﻿using DWIS.RigOS.Common.Model;
+using DWIS.Vocabulary.Schemas;
+using OSDC.DotnetLibraries.Drilling.DrillingProperties;
+using OSDC.DotnetLibraries.General.Statistics;
+using OSDC.UnitConversion.Conversion.DrillingEngineering;
+using OSDC.UnitConversion.Conversion;
+
+namespace DWIS.DAQBridge.RheoSense.Model
+{
+    public class FlowCurveMeasurement
+    {
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticDiracVariable("ConcentricCylindersRotationalSpeed")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersRotationalSpeed")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling)]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        public ContinuousDistribution? ConcentricCylindersRotationalSpeed { get; set; } = null;
+
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticGaussianVariable("ConcentricCylindersShearRateNewtonianHypothesis", "Sigma_ConcentricCylindersShearRateNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Nouns.Enum.ComputedData)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersShearRateNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.FluidShearRate)]
+        [SemanticFact("Sigma_ConcentricCylindersShearRateNewtonianHypothesis", Nouns.Enum.DrillingSignal)]
+        [SemanticFact("Sigma_ConcentricCylindersShearRateNewtonianHypothesis#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("GaussianUncertainty#01", Nouns.Enum.GaussianUncertainty)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.HasUncertainty, "GaussianUncertainty#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyMean, "ConcentricCylindersShearRateNewtonianHypothesis#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_ConcentricCylindersShearRateNewtonianHypothesis#01")]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.IsDependentOn, "ConcentricCylindersRotationalSpeed#01")]
+        [SemanticFact("NewtonianFluidModel#01", Nouns.Enum.NewtonianFluid)]
+        [SemanticFact("ConcentricCylindersShearRateNewtonianHypothesis#01", Verbs.Enum.IsCalculatedUsingRheologicalHypothesis, "NewtonianFluidModel#01")]
+        public GaussianDistribution? ConcentricCylindersShearRateNewtonianHypothesis { get; set; } = null;
+
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticGaussianVariable("ConcentricCylindersShearRateNonNewtonianHypothesis", "Sigma_ConcentricCylindersShearRateNonNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Nouns.Enum.ComputedData)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersShearRateNonNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.FluidShearRate)]
+        [SemanticFact("Sigma_ConcentricCylindersShearRateNonNewtonianHypothesis", Nouns.Enum.DrillingSignal)]
+        [SemanticFact("Sigma_ConcentricCylindersShearRateNonNewtonianHypothesis#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("GaussianUncertainty#01", Nouns.Enum.GaussianUncertainty)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.HasUncertainty, "GaussianUncertainty#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyMean, "ConcentricCylindersShearRateNonNewtonianHypothesis#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_ConcentricCylindersShearRateNonNewtonianHypothesis#01")]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.IsDependentOn, "ConcentricCylindersRotationalSpeed#01")]
+        [SemanticFact("NonNewtonianFluidModel#01", Nouns.Enum.NonNewtonianFluid)]
+        [SemanticFact("ConcentricCylindersShearRateNonNewtonianHypothesis#01", Verbs.Enum.IsCalculatedUsingRheologicalHypothesis, "NonNewtonianFluidModel#01")]
+        public GaussianDistribution? ConcentricCylindersShearRateNonNewtonianHypothesis { get; set; } = null;
+
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticGaussianVariable("ConcentricCylindersTorque", "Sigma_ConcentricCylindersTorque")]
+        [SemanticFact("ConcentricCylindersTorque", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersTorque#01", Nouns.Enum.Measurement)]
+        [SemanticFact("ConcentricCylindersTorque#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersTorque#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersTorque")]
+        [SemanticFact("ConcentricCylindersTorque#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.TorqueSmall)]
+        [SemanticFact("Sigma_ConcentricCylindersTorque", Nouns.Enum.DrillingSignal)]
+        [SemanticFact("Sigma_ConcentricCylindersTorque#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("GaussianUncertainty#01", Nouns.Enum.GaussianUncertainty)]
+        [SemanticFact("ConcentricCylindersTorque#01", Verbs.Enum.HasUncertainty, "GaussianUncertainty#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyMean, "ConcentricCylindersTorque#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_ConcentricCylindersTorque#01")]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersTorque#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersTorque#01", Verbs.Enum.IsDependentOn, "ConcentricCylindersRotationalSpeed#01")]
+        public GaussianDistribution? ConcentricCylindersTorque { get; set; } = null;
+
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticGaussianVariable("ConcentricCylindersShearStressNewtonianHypothesis", "Sigma_ConcentricCylindersShearStressNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Nouns.Enum.ComputedData)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersShearStressNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.FluidShearStress)]
+        [SemanticFact("Sigma_ConcentricCylindersShearStressNewtonianHypothesis", Nouns.Enum.DrillingSignal)]
+        [SemanticFact("Sigma_ConcentricCylindersShearStressNewtonianHypothesis#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("GaussianUncertainty#01", Nouns.Enum.GaussianUncertainty)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.HasUncertainty, "GaussianUncertainty#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyMean, "ConcentricCylindersShearStressNewtonianHypothesis#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_ConcentricCylindersShearStressNewtonianHypothesis#01")]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.IsDependentOn, "ConcentricCylindersRotationalSpeed#01")]
+        [SemanticFact("NewtonianFluidModel#01", Nouns.Enum.NewtonianFluid)]
+        [SemanticFact("ConcentricCylindersShearStressNewtonianHypothesis#01", Verbs.Enum.IsCalculatedUsingRheologicalHypothesis, "NewtonianFluidModel#01")]
+        public GaussianDistribution? ConcentricCylindersShearStressNewtonianHypothesis { get; set; } = null;
+
+        [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
+        [Mandatory(CommonProperty.MandatoryType.General)]
+        [SemanticGaussianVariable("ConcentricCylindersShearStressNonNewtonianHypothesis", "Sigma_ConcentricCylindersShearStressNonNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis", Nouns.Enum.DynamicDrillingSignal)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Nouns.Enum.ComputedData)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.HasDynamicValue, "ConcentricCylindersShearStressNonNewtonianHypothesis")]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.FluidShearStress)]
+        [SemanticFact("Sigma_ConcentricCylindersShearStressNonNewtonianHypothesis", Nouns.Enum.DrillingSignal)]
+        [SemanticFact("Sigma_ConcentricCylindersShearStressNonNewtonianHypothesis#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("GaussianUncertainty#01", Nouns.Enum.GaussianUncertainty)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.HasUncertainty, "GaussianUncertainty#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyMean, "ConcentricCylindersShearStressNonNewtonianHypothesis#01")]
+        [SemanticFact("GaussianUncertainty#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_ConcentricCylindersShearStressNonNewtonianHypothesis#01")]
+        [SemanticFact("ConcentricCylindersMeasurementPrinciple#01", Nouns.Enum.ConcentricCylindersMeasurementPrinciple)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.SetPoint)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Nouns.Enum.ContinuousDataType)]
+        [SemanticFact("ConcentricCylindersRotationalSpeed#01", Verbs.Enum.ControlsFlowMeasurementPrinciple, "ConcentricCylindersMeasurementPrinciple#01")]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.IsDependentOn, "ConcentricCylindersRotationalSpeed#01")]
+        [SemanticFact("NonNewtonianFluidModel#01", Nouns.Enum.NonNewtonianFluid)]
+        [SemanticFact("ConcentricCylindersShearStressNonNewtonianHypothesis#01", Verbs.Enum.IsCalculatedUsingRheologicalHypothesis, "NonNewtonianFluidModel#01")]
+        public GaussianDistribution? ConcentricCylindersShearStressNonNewtonianHypothesis { get; set; } = null;
+    }
+
+    public class FlowCurve : TokenizedAssignableReferenceStringValue
+    {
+        public List<FlowCurveMeasurement>? Measurements { get; set; } = null;
+    }
+}
