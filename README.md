@@ -140,3 +140,95 @@ immutable `sha-<commit>` tags for:
 
 The repository requires `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD` GitHub
 Actions secrets. Docker builds use the repository root as their context.
+
+### Run on Windows
+
+From PowerShell, create the shared host directory and copy the initial
+configuration into it:
+
+```powershell
+New-Item -ItemType Directory -Force C:\Volumes\DWISBridgeRheoSense | Out-Null
+Copy-Item .\config\config.example.json C:\Volumes\DWISBridgeRheoSense\config.json
+```
+
+Before starting the containers, edit
+`C:\Volumes\DWISBridgeRheoSense\config.json` so `OPCUAURL` and
+`GeneralBlackboard` are reachable from Docker. When those endpoints run on the
+Windows host, use `host.docker.internal` instead of `localhost`.
+
+Run the synthetic OPC-UA source:
+
+```powershell
+docker run -d --name rheosense-opcua-source --restart unless-stopped --pull always `
+  --mount "type=bind,source=C:/Volumes/DWISBridgeRheoSense,target=/home" `
+  digiwells/dwisdaqbridgerheosenseopcuasource:stable
+```
+
+Run the production bridge server:
+
+```powershell
+docker run -d --name rheosense-server --restart unless-stopped --pull always `
+  --mount "type=bind,source=C:/Volumes/DWISBridgeRheoSense,target=/home" `
+  digiwells/dwisdaqbridgerheosenseserver:stable
+```
+
+Run the WebApp and publish it on host port 5080:
+
+```powershell
+docker run -d --name rheosense-webapp --restart unless-stopped --pull always `
+  --mount "type=bind,source=C:/Volumes/DWISBridgeRheoSense,target=/home" `
+  -p 5080:8080 `
+  digiwells/dwisdaqbridgerheosensewebapp:stable
+```
+
+Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
+
+### Run on Linux
+
+Create the shared host directory and install the initial configuration:
+
+```bash
+mkdir -p "$HOME/Volumes/DWISBridgeRheoSense"
+cp ./config/config.example.json "$HOME/Volumes/DWISBridgeRheoSense/config.json"
+```
+
+Edit `$HOME/Volumes/DWISBridgeRheoSense/config.json` before starting the
+containers. Then grant the container user ownership so the server can write
+logs and the WebApp can persist preferences and data-protection keys:
+
+```bash
+sudo chown -R 1654:1654 "$HOME/Volumes/DWISBridgeRheoSense"
+```
+
+If OPC-UA or Blackboard runs on the Linux host, use `host.docker.internal` in
+its URL. The commands below add that hostname to each container.
+
+Run the synthetic OPC-UA source:
+
+```bash
+docker run -d --name rheosense-opcua-source --restart unless-stopped --pull always \
+  --add-host host.docker.internal:host-gateway \
+  --mount type=bind,source="$HOME/Volumes/DWISBridgeRheoSense",target=/home \
+  digiwells/dwisdaqbridgerheosenseopcuasource:stable
+```
+
+Run the production bridge server:
+
+```bash
+docker run -d --name rheosense-server --restart unless-stopped --pull always \
+  --add-host host.docker.internal:host-gateway \
+  --mount type=bind,source="$HOME/Volumes/DWISBridgeRheoSense",target=/home \
+  digiwells/dwisdaqbridgerheosenseserver:stable
+```
+
+Run the WebApp and publish it on host port 5080:
+
+```bash
+docker run -d --name rheosense-webapp --restart unless-stopped --pull always \
+  --add-host host.docker.internal:host-gateway \
+  --mount type=bind,source="$HOME/Volumes/DWISBridgeRheoSense",target=/home \
+  -p 5080:8080 \
+  digiwells/dwisdaqbridgerheosensewebapp:stable
+```
+
+Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
