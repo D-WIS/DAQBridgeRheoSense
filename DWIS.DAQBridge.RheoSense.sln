@@ -7,6 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.Server", "DWIS.DAQBridge.RheoSense.Server\DWIS.DAQBridge.RheoSense.Server.csproj", "{127DA9C3-24CD-46B7-8986-F40D17E38A2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.OPCUASource", "DWIS.DAQBridge.RheoSense.OPCUASource\DWIS.DAQBridge.RheoSense.OPCUASource.csproj", "{A10AA1C5-761D-4D29-9D22-8B25E561C001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.BlackboardSink", "DWIS.DAQBridge.RheoSense.BlackboardSink\DWIS.DAQBridge.RheoSense.BlackboardSink.csproj", "{B20BB2D6-872E-4E3A-AE33-9C36F672D002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.Tests", "DWIS.DAQBridge.RheoSense.Tests\DWIS.DAQBridge.RheoSense.Tests.csproj", "{D40DD4F8-A940-405C-C055-BE581894F004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.RheoSense.WebApp", "DWIS.DAQBridge.RheoSense.WebApp\DWIS.DAQBridge.RheoSense.WebApp.csproj", "{E50EE509-BA51-416D-D166-CF6929A5F005}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +29,22 @@ Global
 		{127DA9C3-24CD-46B7-8986-F40D17E38A2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{127DA9C3-24CD-46B7-8986-F40D17E38A2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{127DA9C3-24CD-46B7-8986-F40D17E38A2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A10AA1C5-761D-4D29-9D22-8B25E561C001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A10AA1C5-761D-4D29-9D22-8B25E561C001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A10AA1C5-761D-4D29-9D22-8B25E561C001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A10AA1C5-761D-4D29-9D22-8B25E561C001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B20BB2D6-872E-4E3A-AE33-9C36F672D002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B20BB2D6-872E-4E3A-AE33-9C36F672D002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B20BB2D6-872E-4E3A-AE33-9C36F672D002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20BB2D6-872E-4E3A-AE33-9C36F672D002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D40DD4F8-A940-405C-C055-BE581894F004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D40DD4F8-A940-405C-C055-BE581894F004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D40DD4F8-A940-405C-C055-BE581894F004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D40DD4F8-A940-405C-C055-BE581894F004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E50EE509-BA51-416D-D166-CF6929A5F005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E50EE509-BA51-416D-D166-CF6929A5F005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E50EE509-BA51-416D-D166-CF6929A5F005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E50EE509-BA51-416D-D166-CF6929A5F005}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

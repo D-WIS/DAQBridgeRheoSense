@@ -1,0 +1,21 @@
+html, body { font-family: Roboto, sans-serif; margin: 0; background: #f5f7fa; }
+#blazor-error-ui { display: none; position: fixed; bottom: 0; width: 100%; padding: 0.8rem; background: #b71c1c; color: white; z-index: 2000; }
+.trend-chart { display: block; width: 100%; height: auto; max-height: 205px; margin: 0 auto; }
+.trend-chart text { font-family: Roboto, sans-serif; fill: #455a64; font-size: 12px; }
+.chart-grid { stroke: #dfe5e8; stroke-width: 1; }
+.chart-axis { stroke: #78909c; stroke-width: 1.25; }
+.legend-label { font-size: 12px; }
+.dashboard-controls-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.target-condition-controls { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 0.75rem; flex: 1 1 720px; }
+.rheosense-dashboard-split { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.rheosense-dashboard-column { min-width: 0; }
+.dashboard-column-title { margin: 0 0 0.5rem 0.25rem; color: #37474f; }
+.flow-curve-chart { display: block; width: 100%; height: auto; max-height: 310px; margin: 0 auto; }
+.flow-curve-chart text { font-family: Roboto, sans-serif; fill: #455a64; font-size: 12px; }
+@media (max-width: 960px) {
+  .rheosense-dashboard-split { grid-template-columns: 1fr; }
+  .target-condition-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .target-condition-controls { grid-template-columns: 1fr; }
+}

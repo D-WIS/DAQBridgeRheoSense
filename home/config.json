@@ -1,0 +1,593 @@
+{
+  "OPCUAURL": "opc.tcp://localhost:48030",
+  "OPCUALoopDuration": "00:00:01",
+  "LoopDuration": "00:00:01",
+  "ConnectionRetryInterval": "00:00:05",
+  "EnableDataLogging": true,
+  "DataLogDirectory": "/home",
+  "DataLogSegmentDuration": "06:00:00",
+  "MaximumDataLogStorageBytes": 1073741824,
+  "WebAppTimeSpanHours": 2,
+  "GeneralBlackboard": "opc.tcp://localhost:48030",
+  "InitializeOPCUAVariables": true,
+  "SimulationSeed": 20261016,
+  "SimulationConditionGenerationPeriod": "00:00:10",
+  "SimulationDataGenerationPeriod": "00:30:00",
+  "SimulationOPCUAPublishPeriod": "00:05:00",
+  "ActivePitTags": {
+    "UnitConversions": {},
+    "StandardDeviationUnitConversions": {},
+    "Signals": {
+      "MeasuredTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.MeasuredTemperature"
+      },
+      "MeasuredPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.MeasuredPressure"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt3RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt6RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt10RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt20RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt30RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt60RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt100RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt200RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt300RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt600RPMAtMeasuredTemperatureAndPressure"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.PlasticViscosityAtMeasuredTemperatureAndPressure"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YieldPointAtMeasuredTemperatureAndPressure"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLYieldStressAtMeasuredTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLConsistencyIndexAtMeasuredTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure"
+      },
+      "ExtrapolatedTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ExtrapolatedTemperature"
+      },
+      "ExtrapolatedPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ExtrapolatedPressure"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt3RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt6RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt10RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt20RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt30RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt60RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt100RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt200RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt300RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.ShearStressAt600RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.PlasticViscosityAtExtraplatedTemperatureAndPressure"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YieldPointAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLYieldStressAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLConsistencyIndexAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure"
+      }
+    },
+    "StandardDeviationSignals": {
+      "MeasuredTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_MeasuredTemperature"
+      },
+      "MeasuredPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_MeasuredPressure"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_MassDensityFromCoriolisAtMeasuredTemperatureAndPressure"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt3RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt6RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt10RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt20RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt30RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt60RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt100RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt200RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt300RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt600RPMAtMeasuredTemperatureAndPressure"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_PlasticViscosityAtMeasuredTemperatureAndPressure"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YieldPointAtMeasuredTemperatureAndPressure"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLYieldStressAtMeasuredTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLConsistencyIndexAtMeasuredTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt3RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt6RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt10RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt20RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt30RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt60RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt100RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt200RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt300RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_ShearStressAt600RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_PlasticViscosityAtExtraplatedTemperatureAndPressure"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YieldPointAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLYieldStressAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLConsistencyIndexAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseActivePitDataManifest/Variables/",
+        "NodeID": "RheoSenseActivePitDataManifest.Sigma_YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure"
+      }
+    }
+  },
+  "FlowLineTags": {
+    "UnitConversions": {},
+    "StandardDeviationUnitConversions": {},
+    "Signals": {
+      "MeasuredTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.MeasuredTemperature"
+      },
+      "MeasuredPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.MeasuredPressure"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt3RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt6RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt10RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt20RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt30RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt60RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt100RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt200RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt300RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt600RPMAtMeasuredTemperatureAndPressure"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.PlasticViscosityAtMeasuredTemperatureAndPressure"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YieldPointAtMeasuredTemperatureAndPressure"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLYieldStressAtMeasuredTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLConsistencyIndexAtMeasuredTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure"
+      },
+      "ExtrapolatedTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ExtrapolatedTemperature"
+      },
+      "ExtrapolatedPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ExtrapolatedPressure"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt3RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt6RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt10RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt20RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt30RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt60RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt100RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt200RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt300RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.ShearStressAt600RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.PlasticViscosityAtExtraplatedTemperatureAndPressure"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YieldPointAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLYieldStressAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLConsistencyIndexAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure"
+      }
+    },
+    "StandardDeviationSignals": {
+      "MeasuredTemperature": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_MeasuredTemperature"
+      },
+      "MeasuredPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_MeasuredPressure"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_MassDensityFromCoriolisAtMeasuredTemperatureAndPressure"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt3RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt6RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt10RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt20RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt30RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt60RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt100RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt200RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt300RPMAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt600RPMAtMeasuredTemperatureAndPressure"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_PlasticViscosityAtMeasuredTemperatureAndPressure"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YieldPointAtMeasuredTemperatureAndPressure"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLYieldStressAtMeasuredTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLConsistencyIndexAtMeasuredTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt3RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt6RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt10RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt20RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt30RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt60RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt100RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt200RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt300RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_ShearStressAt600RPMAtExtraplatedTemperatureAndPressure"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_PlasticViscosityAtExtraplatedTemperatureAndPressure"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YieldPointAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLYieldStressAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLConsistencyIndexAtExtraplatedTemperatureAndPressure"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "NameSpace": "http://ddhub.no/RheoSenseFlowLineDataManifest/Variables/",
+        "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure"
+      }
+    }
+  }
+}

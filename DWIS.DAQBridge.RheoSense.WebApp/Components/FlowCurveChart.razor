@@ -1,0 +1,142 @@
+@using System.Globalization
+
+<MudPaper Class="pa-3 mb-3" Elevation="1">
+    <MudText Typo="Typo.subtitle1">@Title</MudText>
+    <MudText Typo="Typo.caption" Color="Color.Secondary">
+        Shear rate (@ShearRateUnit) / shear stress (@ShearStressUnit)
+    </MudText>
+    <svg class="flow-curve-chart" viewBox="0 0 1000 310" role="img" aria-label="@Title">
+        @foreach (double fraction in TickFractions)
+        {
+            double y = PlotTop + fraction * PlotHeight;
+            <line class="chart-grid" x1="@PlotLeft" y1="@y" x2="@(PlotLeft + PlotWidth)" y2="@y" />
+            @SvgText(PlotLeft - 10, y + 4, FormatValue(yMaximum - fraction * (yMaximum - yMinimum)), anchor: "end")
+        }
+        @foreach (double fraction in TickFractions)
+        {
+            double x = PlotLeft + fraction * PlotWidth;
+            <line class="chart-grid" x1="@x" y1="@PlotTop" x2="@x" y2="@(PlotTop + PlotHeight)" />
+            @SvgText(x, PlotTop + PlotHeight + 22, FormatValue(xMinimum + fraction * (xMaximum - xMinimum)), anchor: "middle")
+        }
+        <line class="chart-axis" x1="@PlotLeft" y1="@PlotTop" x2="@PlotLeft" y2="@(PlotTop + PlotHeight)" />
+        <line class="chart-axis" x1="@PlotLeft" y1="@(PlotTop + PlotHeight)" x2="@(PlotLeft + PlotWidth)" y2="@(PlotTop + PlotHeight)" />
+
+        @foreach (FlowCurveSeries series in Series)
+        {
+            string points = BuildPolyline(series);
+            if (!string.IsNullOrEmpty(points))
+            {
+                <polyline points="@points"
+                          fill="none"
+                          stroke="@series.Color"
+                          stroke-width="2.75"
+                          stroke-dasharray="@(series.Dashed ? "10 7" : null)"
+                          stroke-linejoin="round"
+                          stroke-linecap="round" />
+            }
+        }
+
+        @for (int index = 0; index < Series.Count; index++)
+        {
+            FlowCurveSeries series = Series[index];
+            double x = PlotLeft + (index % 2) * 445;
+            double y = 12 + (index / 2) * 20;
+            <line x1="@x" y1="@y" x2="@(x + 26)" y2="@y"
+                  stroke="@series.Color" stroke-width="4"
+                  stroke-dasharray="@(series.Dashed ? "8 6" : null)" />
+            @SvgText(x + 33, y + 4, series.Name, cssClass: "legend-label")
+        }
+
+        @if (!Series.Any(series => series.Points.Count > 0))
+        {
+            @SvgText(520, 160, "Waiting for flow-curve data…", anchor: "middle")
+        }
+
+        @SvgText(520, 302, $"Shear rate ({ShearRateUnit})", anchor: "middle")
+        <text x="18" y="@(PlotTop + PlotHeight / 2)"
+              text-anchor="middle"
+              transform="rotate(-90 18 @(PlotTop + PlotHeight / 2))">
+            Shear stress (@ShearStressUnit)
+        </text>
+    </svg>
+</MudPaper>
+
+@code {
+    private const double PlotLeft = 82;
+    private const double PlotTop = 55;
+    private const double PlotWidth = 880;
+    private const double PlotHeight = 190;
+    private static readonly double[] TickFractions = { 0, 0.25, 0.5, 0.75, 1 };
+
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string ShearRateUnit { get; set; } = "s⁻¹";
+    [Parameter] public string ShearStressUnit { get; set; } = "Pa";
+    [Parameter, EditorRequired] public IReadOnlyList<FlowCurveSeries> Series { get; set; } = Array.Empty<FlowCurveSeries>();
+
+    private double xMinimum;
+    private double xMaximum = 1;
+    private double yMinimum;
+    private double yMaximum = 1;
+
+    protected override void OnParametersSet()
+    {
+        FlowCurvePoint[] points = Series.SelectMany(series => series.Points)
+            .Where(point => double.IsFinite(point.ShearRate) && double.IsFinite(point.ShearStress))
+            .ToArray();
+        if (points.Length == 0)
+        {
+            xMinimum = 0;
+            xMaximum = 1;
+            yMinimum = 0;
+            yMaximum = 1;
+            return;
+        }
+
+        xMinimum = Math.Min(0, points.Min(point => point.ShearRate));
+        yMinimum = Math.Min(0, points.Min(point => point.ShearStress));
+        xMaximum = AddPadding(points.Max(point => point.ShearRate), xMinimum);
+        yMaximum = AddPadding(points.Max(point => point.ShearStress), yMinimum);
+    }
+
+    private static double AddPadding(double maximum, double minimum)
+    {
+        return maximum + Math.Max((maximum - minimum) * 0.08, 1e-9);
+    }
+
+    private string BuildPolyline(FlowCurveSeries series)
+    {
+        if (xMaximum <= xMinimum || yMaximum <= yMinimum)
+        {
+            return string.Empty;
+        }
+
+        return string.Join(' ', series.Points
+            .Where(point => double.IsFinite(point.ShearRate) && double.IsFinite(point.ShearStress))
+            .OrderBy(point => point.ShearRate)
+            .Select(point =>
+            {
+                double x = PlotLeft + (point.ShearRate - xMinimum) / (xMaximum - xMinimum) * PlotWidth;
+                double y = PlotTop + (yMaximum - point.ShearStress) / (yMaximum - yMinimum) * PlotHeight;
+                return $"{x.ToString("F2", CultureInfo.InvariantCulture)},{y.ToString("F2", CultureInfo.InvariantCulture)}";
+            }));
+    }
+
+    private static string FormatValue(double value) => value.ToString("G4", CultureInfo.InvariantCulture);
+
+    private static RenderFragment SvgText(double x, double y, string value, string? cssClass = null, string? anchor = null) => builder =>
+    {
+        builder.OpenElement(0, "text");
+        builder.AddAttribute(1, "x", x);
+        builder.AddAttribute(2, "y", y);
+        if (!string.IsNullOrWhiteSpace(cssClass))
+        {
+            builder.AddAttribute(3, "class", cssClass);
+        }
+        if (!string.IsNullOrWhiteSpace(anchor))
+        {
+            builder.AddAttribute(4, "text-anchor", anchor);
+        }
+        builder.AddContent(5, value);
+        builder.CloseElement();
+    };
+}

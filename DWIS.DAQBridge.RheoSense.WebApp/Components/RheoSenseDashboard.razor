@@ -1,0 +1,310 @@
+@implements IDisposable
+@inject RheoSenseHistoryStore History
+@inject RheoSensePreferenceStore Preferences
+
+<MudStack Spacing="2">
+    <MudPaper Class="pa-3" Elevation="1">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <div>
+                <MudText Typo="Typo.h4">RheoSense monitoring</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Live fluid conditions and Yield-Power-Law parameters for the active pit and return flow.
+                </MudText>
+            </div>
+            <MudChip T="string" Color="@(History.IsConnected ? Color.Success : Color.Warning)" Variant="Variant.Outlined" Icon="@(History.IsConnected ? Icons.Material.Filled.CloudDone : Icons.Material.Filled.CloudOff)">
+                @(History.IsConnected ? "Blackboard connected" : "Waiting for Blackboard")
+            </MudChip>
+        </MudStack>
+        <MudDivider Class="my-2" />
+        <div class="dashboard-controls-row">
+            <div class="target-condition-controls">
+                <MudInputWithUnitAdornment VariantType="Variant.Outlined"
+                                           QuantityName="TemperatureDrilling"
+                                           QuantityLabel="Measured temperature"
+                                           ReadOnly="true"
+                                           SIValueNullable="@measuredTemperature" />
+                <MudInputWithUnitAdornment VariantType="Variant.Outlined"
+                                           QuantityName="PressureDrilling"
+                                           QuantityLabel="Measured pressure"
+                                           ReadOnly="true"
+                                           SIValueNullable="@measuredPressure" />
+                <MudInputWithUnitAdornment VariantType="Variant.Outlined"
+                                           QuantityName="TemperatureDrilling"
+                                           QuantityLabel="Extrapolated temperature"
+                                           ReadOnly="true"
+                                           SIValueNullable="@extrapolatedTemperature" />
+                <MudInputWithUnitAdornment VariantType="Variant.Outlined"
+                                           QuantityName="PressureDrilling"
+                                           QuantityLabel="Extrapolated pressure"
+                                           ReadOnly="true"
+                                           SIValueNullable="@extrapolatedPressure" />
+            </div>
+            <TimeSpanControls Value="@timeSpanHours" ValueChanged="SetTimeSpanAsync" />
+        </div>
+    </MudPaper>
+
+    <div class="rheosense-dashboard-split">
+        <section class="rheosense-dashboard-column" aria-label="Fluid conditions">
+            <MudText Typo="Typo.h6" Class="dashboard-column-title">Pressure, temperature and density</MudText>
+            <TimeSeriesChart Title="Density" UnitLabel="@densityUnit" Series="@densitySeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+            <TimeSeriesChart Title="Temperature" UnitLabel="@temperatureUnit" Series="@temperatureSeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+            <TimeSeriesChart Title="Pressure" UnitLabel="@pressureUnit" Series="@pressureSeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+        </section>
+        <section class="rheosense-dashboard-column" aria-label="Yield-Power-Law parameters">
+            <MudText Typo="Typo.h6" Class="dashboard-column-title">Yield-Power-Law parameters</MudText>
+            <TimeSeriesChart Title="YPL yield stress" UnitLabel="@yieldStressUnit" Series="@yieldStressSeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+            <TimeSeriesChart Title="YPL consistency index" UnitLabel="@consistencyUnit" Series="@consistencySeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+            <TimeSeriesChart Title="YPL flow-behavior index" UnitLabel="@flowBehaviorUnit" Series="@flowBehaviorSeries" StartUtc="@windowStartUtc" EndUtc="@nowUtc" DateReferenceName="@DateReferenceName" />
+        </section>
+        <section class="rheosense-dashboard-column flow-curve-column" aria-label="Flow curves">
+            <MudText Typo="Typo.h6" Class="dashboard-column-title">Flow curves</MudText>
+            <FlowCurveChart Title="Active-pit flow curves"
+                            ShearRateUnit="@shearRateUnit"
+                            ShearStressUnit="@yieldStressUnit"
+                            Series="@activePitFlowCurveSeries" />
+            <FlowCurveChart Title="Return-flow flow curves"
+                            ShearRateUnit="@shearRateUnit"
+                            ShearStressUnit="@yieldStressUnit"
+                            Series="@flowLineFlowCurveSeries" />
+        </section>
+    </div>
+</MudStack>
+
+@code {
+    private const string ActiveMeasuredColor = "#1565C0";
+    private const string ActiveExtrapolatedColor = "#64B5F6";
+    private const string FlowMeasuredColor = "#EF6C00";
+    private const string FlowExtrapolatedColor = "#FFB74D";
+    private const string ActiveCurveExtrapolatedColor = "#00ACC1";
+    private const string FlowCurveExtrapolatedColor = "#D84315";
+    private const int MaximumSamplesPerChart = 300;
+    private readonly PeriodicTimer refreshTimer = new(TimeSpan.FromSeconds(5));
+    private CancellationTokenSource? refreshCancellation;
+    private DateTimeOffset nowUtc = DateTimeOffset.UtcNow;
+    private DateTimeOffset windowStartUtc;
+    private int timeSpanHours = 6;
+    private string? preparedUnitSystemName;
+    private string yieldStressUnit = "Pa";
+    private string consistencyUnit = "Pa·sⁿ";
+    private string flowBehaviorUnit = "–";
+    private string densityUnit = "kg/m³";
+    private string temperatureUnit = "K";
+    private string pressureUnit = "Pa";
+    private string shearRateUnit = "s⁻¹";
+    private double? measuredTemperature;
+    private double? measuredPressure;
+    private double? extrapolatedTemperature;
+    private double? extrapolatedPressure;
+    private IReadOnlyList<TrendSeries> yieldStressSeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<TrendSeries> consistencySeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<TrendSeries> flowBehaviorSeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<TrendSeries> densitySeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<TrendSeries> temperatureSeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<TrendSeries> pressureSeries = Array.Empty<TrendSeries>();
+    private IReadOnlyList<FlowCurveSeries> activePitFlowCurveSeries = Array.Empty<FlowCurveSeries>();
+    private IReadOnlyList<FlowCurveSeries> flowLineFlowCurveSeries = Array.Empty<FlowCurveSeries>();
+
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? UnitChoice { get; set; }
+
+    [Parameter]
+    public string? UnitSystemName { get; set; }
+
+    [Parameter]
+    public string DateReferenceName { get; set; } = "UTC";
+
+    protected override void OnInitialized()
+    {
+        timeSpanHours = Preferences.LoadTimeSpanHours();
+        PrepareChartSnapshot(DateTimeOffset.UtcNow);
+        refreshCancellation = new CancellationTokenSource();
+        _ = RefreshAsync(refreshCancellation.Token);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.Equals(preparedUnitSystemName, UnitSystemName, StringComparison.Ordinal))
+        {
+            preparedUnitSystemName = UnitSystemName;
+            PrepareChartSnapshot(DateTimeOffset.UtcNow);
+        }
+    }
+
+    private async Task RefreshAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (await refreshTimer.WaitForNextTickAsync(cancellationToken))
+            {
+                PrepareChartSnapshot(DateTimeOffset.UtcNow);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+    }
+
+    private async Task SetTimeSpanAsync(int value)
+    {
+        timeSpanHours = Math.Clamp(
+            value,
+            RheoSensePreferenceStore.MinimumHours,
+            RheoSensePreferenceStore.MaximumHours);
+        PrepareChartSnapshot(DateTimeOffset.UtcNow);
+        await Preferences.SaveTimeSpanHoursAsync(timeSpanHours);
+    }
+
+    private void PrepareChartSnapshot(DateTimeOffset timestampUtc)
+    {
+        nowUtc = timestampUtc;
+        windowStartUtc = nowUtc.AddHours(-timeSpanHours);
+        TimeSpan window = TimeSpan.FromHours(timeSpanHours);
+        IReadOnlyList<YplTrendSample> yplSamples = History.GetYplWindowDownsampled(
+            window,
+            nowUtc,
+            MaximumSamplesPerChart);
+        IReadOnlyList<YplTrendSample> conditionSamples = History.GetConditionWindowDownsampled(
+            window,
+            nowUtc,
+            MaximumSamplesPerChart);
+
+        yieldStressUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.FluidShearStress) ?? "Pa";
+        consistencyUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology) ?? "Pa·sⁿ";
+        flowBehaviorUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.DimensionLessStandard) ?? "–";
+        densityUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.MassDensity) ?? "kg/m³";
+        temperatureUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.Temperature) ?? "K";
+        pressureUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.Pressure) ?? "Pa";
+        shearRateUnit = UnitChoice?.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.FluidShearRate) ?? "s⁻¹";
+        yieldStressSeries = BuildYplSeries(yplSamples, values => values.YieldStress, ConvertYieldStress);
+        consistencySeries = BuildYplSeries(yplSamples, values => values.ConsistencyIndex, ConvertConsistency);
+        flowBehaviorSeries = BuildYplSeries(yplSamples, values => values.FlowBehaviorIndex, ConvertFlowBehavior);
+        densitySeries = BuildDensitySeries(conditionSamples);
+        temperatureSeries = BuildConditionSeries(
+            conditionSamples,
+            values => values.Temperature,
+            ConvertTemperature);
+        pressureSeries = BuildConditionSeries(
+            conditionSamples,
+            values => values.Pressure,
+            ConvertPressure);
+
+        (FlowCurveSnapshot? activePit, FlowCurveSnapshot? flowLine) = History.GetLatestFlowCurves();
+        measuredTemperature = activePit?.MeasuredTemperature ?? flowLine?.MeasuredTemperature;
+        measuredPressure = activePit?.MeasuredPressure ?? flowLine?.MeasuredPressure;
+        extrapolatedTemperature = activePit?.ExtrapolatedTemperature ?? flowLine?.ExtrapolatedTemperature;
+        extrapolatedPressure = activePit?.ExtrapolatedPressure ?? flowLine?.ExtrapolatedPressure;
+        activePitFlowCurveSeries = BuildFlowCurveSeries(
+            activePit,
+            ActiveMeasuredColor,
+            ActiveCurveExtrapolatedColor);
+        flowLineFlowCurveSeries = BuildFlowCurveSeries(
+            flowLine,
+            FlowMeasuredColor,
+            FlowCurveExtrapolatedColor);
+    }
+
+    private static IReadOnlyList<TrendSeries> BuildYplSeries(
+        IReadOnlyList<YplTrendSample> samples,
+        Func<YplValues, double?> selector,
+        Func<double, double> convert)
+    {
+        return new[]
+        {
+            CreateSeries("Active pit — measured p,T", ActiveMeasuredColor, samples, sample => selector(sample.ActivePitMeasured), convert),
+            CreateSeries("Active pit — extrapolated p,T", ActiveExtrapolatedColor, samples, sample => selector(sample.ActivePitExtrapolated), convert),
+            CreateSeries("Return flow — measured p,T", FlowMeasuredColor, samples, sample => selector(sample.FlowLineMeasured), convert),
+            CreateSeries("Return flow — extrapolated p,T", FlowExtrapolatedColor, samples, sample => selector(sample.FlowLineExtrapolated), convert)
+        };
+    }
+
+    private static IReadOnlyList<TrendSeries> BuildConditionSeries(
+        IReadOnlyList<YplTrendSample> samples,
+        Func<ConditionValues, double?> selector,
+        Func<double, double> convert)
+    {
+        return new[]
+        {
+            CreateSeries("Active pit", ActiveMeasuredColor, samples, sample =>
+                sample.ActivePitConditions is null ? null : selector(sample.ActivePitConditions), convert),
+            CreateSeries("Return flow", FlowMeasuredColor, samples, sample =>
+                sample.FlowLineConditions is null ? null : selector(sample.FlowLineConditions), convert)
+        };
+    }
+
+    private IReadOnlyList<TrendSeries> BuildDensitySeries(IReadOnlyList<YplTrendSample> samples)
+    {
+        return new[]
+        {
+            CreateSeries("Active — Coriolis", ActiveMeasuredColor, samples, sample => sample.ActivePitConditions?.CoriolisDensity, ConvertDensity),
+            CreateSeries("Active — vertical", ActiveExtrapolatedColor, samples, sample => sample.ActivePitConditions?.VerticalPipeDensity, ConvertDensity),
+            CreateSeries("Return — Coriolis", FlowMeasuredColor, samples, sample => sample.FlowLineConditions?.CoriolisDensity, ConvertDensity),
+            CreateSeries("Return — vertical", FlowExtrapolatedColor, samples, sample => sample.FlowLineConditions?.VerticalPipeDensity, ConvertDensity)
+        };
+    }
+
+    private IReadOnlyList<FlowCurveSeries> BuildFlowCurveSeries(
+        FlowCurveSnapshot? snapshot,
+        string currentColor,
+        string extrapolatedColor)
+    {
+        if (snapshot is null)
+        {
+            return Array.Empty<FlowCurveSeries>();
+        }
+
+        return new[]
+        {
+            CreateFlowCurveSeries("True — measured p,T", currentColor, false, snapshot.TrueAtMeasuredConditions),
+            CreateFlowCurveSeries("Fann 35 — measured p,T", currentColor, true, snapshot.Fann35AtMeasuredConditions),
+            CreateFlowCurveSeries("True — extrapolated p,T", extrapolatedColor, false, snapshot.TrueAtExtrapolatedConditions),
+            CreateFlowCurveSeries("Fann 35 — extrapolated p,T", extrapolatedColor, true, snapshot.Fann35AtExtrapolatedConditions)
+        };
+    }
+
+    private FlowCurveSeries CreateFlowCurveSeries(
+        string name,
+        string color,
+        bool dashed,
+        IReadOnlyList<FlowCurvePoint> points)
+    {
+        return new FlowCurveSeries(
+            name,
+            color,
+            dashed,
+            points.Select(point => new FlowCurvePoint(
+                ConvertShearRate(point.ShearRate),
+                ConvertYieldStress(point.ShearStress))).ToArray());
+    }
+
+    private static TrendSeries CreateSeries(
+        string name,
+        string color,
+        IReadOnlyList<YplTrendSample> samples,
+        Func<YplTrendSample, double?> selector,
+        Func<double, double> convert)
+    {
+        TrendPoint[] points = samples
+            .Select(sample => (sample.TimestampUtc, Value: selector(sample)))
+            .Where(item => item.Value is not null && double.IsFinite(item.Value.Value))
+            .Select(item => new TrendPoint(item.TimestampUtc, convert(item.Value!.Value)))
+            .ToArray();
+
+        return new TrendSeries(name, color, points);
+    }
+
+    private double ConvertYieldStress(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.FluidShearStress) ?? value;
+    private double ConvertConsistency(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology) ?? value;
+    private double ConvertFlowBehavior(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.DimensionLessStandard) ?? value;
+    private double ConvertDensity(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.MassDensity) ?? value;
+    private double ConvertTemperature(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.Temperature) ?? value;
+    private double ConvertPressure(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.Pressure) ?? value;
+    private double ConvertShearRate(double value) => UnitChoice?.FromSI(value, BasePhysicalQuantity.QuantityEnum.FluidShearRate) ?? value;
+
+    public void Dispose()
+    {
+        refreshCancellation?.Cancel();
+        refreshCancellation?.Dispose();
+        refreshTimer.Dispose();
+    }
+}

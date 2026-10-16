@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.5-build.384" />
+    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.5-build.494" />
+    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.5-build.498" />
+    <PackageReference Include="YPLCalibrationFromRheometer.Model" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

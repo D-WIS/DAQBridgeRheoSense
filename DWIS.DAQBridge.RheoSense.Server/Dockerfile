@@ -2,6 +2,8 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+USER root
+RUN mkdir -p /home && chown -R $APP_UID /home
 USER $APP_UID
 WORKDIR /app
 
@@ -11,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["DWIS.DAQBridge.RheoSense.Server/DWIS.DAQBridge.RheoSense.Server.csproj", "DWIS.DAQBridge.RheoSense.Server/"]
+COPY ["DWIS.DAQBridge.RheoSense.Model/DWIS.DAQBridge.RheoSense.Model.csproj", "DWIS.DAQBridge.RheoSense.Model/"]
 RUN dotnet restore "./DWIS.DAQBridge.RheoSense.Server/DWIS.DAQBridge.RheoSense.Server.csproj"
 COPY . .
 WORKDIR "/src/DWIS.DAQBridge.RheoSense.Server"
@@ -24,5 +27,6 @@ RUN dotnet publish "./DWIS.DAQBridge.RheoSense.Server.csproj" -c $BUILD_CONFIGUR
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
+VOLUME /home
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DWIS.DAQBridge.RheoSense.Server.dll"]

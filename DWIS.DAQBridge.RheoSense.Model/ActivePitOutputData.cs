@@ -1,4 +1,7 @@
-﻿using DWIS.Vocabulary.Schemas;
+using DWIS.API.DTO;
+using DWIS.RigOS.Common.Worker;
+using DWIS.Vocabulary.Schemas;
+using System.Reflection;
 using OSDC.DotnetLibraries.Drilling.DrillingProperties;
 using OSDC.UnitConversion.Conversion;
 using OSDC.UnitConversion.Conversion.DrillingEngineering;
@@ -6,8 +9,14 @@ using DWIS.RigOS.Common.Model;
 
 namespace DWIS.DAQBridge.RheoSense.Model
 {
-    public class ActivePitOutputData
+    public class ActivePitOutputData : DWISData, IRheoSenseOutputData
     {
+        private static readonly Lazy<IReadOnlyDictionary<PropertyInfo, Dictionary<string, QuerySpecification>>> LocalSparQLQueries = new(BuildSparQLQueries(typeof(ActivePitOutputData)));
+        private static readonly Lazy<IReadOnlyDictionary<PropertyInfo, ManifestFile>> LocalManifests = new(BuildManifests(typeof(ActivePitOutputData), RheoSenseConstants.ActivePitManifest, RheoSenseConstants.Provider, "DWISBridge"));
+
+        public override Lazy<IReadOnlyDictionary<PropertyInfo, Dictionary<string, QuerySpecification>>> SparQLQueries => LocalSparQLQueries;
+        public override Lazy<IReadOnlyDictionary<PropertyInfo, ManifestFile>> Manifests => LocalManifests;
+
         // --------------------------------------------------------------------
         // Measured Temperature (Gaussian)
         // --------------------------------------------------------------------
@@ -46,7 +55,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitMeasuredTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        public GaussianDrillingProperty? MeasuredTemperature { get; set; } = null;
+        public GaussianProperty? MeasuredTemperature { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Measured Pressure (Gaussian)
@@ -86,7 +95,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        public GaussianDrillingProperty? MeasuredPressure { get; set; } = null;
+        public GaussianProperty? MeasuredPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Mass density from Coriolis at measured T & P (Gaussian)
@@ -115,7 +124,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_RheoSenseAtActivePitDensityCoriolisFlowmeter#01")]
         // Principle + device/location/branch/provider + dependency
         [SemanticFact("VibratingTubeCoriolisFlowmeterPrinciple", Nouns.Enum.ResonantMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "VibratingTubeCoriolisFlowmeterPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.UsesMeasurementPrinciple, "VibratingTubeCoriolisFlowmeterPrinciple")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
         [SemanticFact("RheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
@@ -151,7 +160,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitDensityCoriolisFlowmeter#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? MassDensityFromCoriolisAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? MassDensityFromCoriolisAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Mass density from vertical pipe at measured T & P (Gaussian)
@@ -180,7 +189,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.HasUncertaintyStandardDeviation, "Sigma_RheoSenseAtActivePitDensityVerticalPipe#01")]
         // Principle + frame + device/location/branch/provider + dependency
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("verticalReferenceFrame", Nouns.Enum.VerticalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "verticalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
@@ -218,7 +227,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitDensityVerticalPipe#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Flow curve at measured T & P (JSON)
@@ -236,7 +245,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("MovingAverageRheoSenseAtActivePitFlowCurveAtMeasuredTP", Nouns.Enum.MovingAverage)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Verbs.Enum.IsTransformationOutput, "MovingAverageRheoSenseAtActivePitFlowCurveAtMeasuredTP")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
@@ -291,6 +300,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("BinghamPlasticModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.IsComputedBy, "BinghamPlasticModelFitter")]
+        [SemanticFact("BinghamPlasticModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitPlasticViscosityAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -305,12 +315,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("binghamPlastic", Nouns.Enum.BinghamPlastic)]
         [SemanticFact("binghamPlastic", Verbs.Enum.HasPlasticViscosity, "RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -343,7 +352,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtMeasuredTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? PlasticViscosityAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? PlasticViscosityAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Yield Point at measured T & P (Gaussian, Bingham parameter)
@@ -360,6 +369,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("BinghamPlasticModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.IsComputedBy, "BinghamPlasticModelFitter")]
+        [SemanticFact("BinghamPlasticModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldPointAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -374,12 +384,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("binghamPlastic", Nouns.Enum.BinghamPlastic)]
         [SemanticFact("binghamPlastic", Verbs.Enum.HasYieldPoint, "RheoSenseAtActivePitYieldPointAtMeasuredTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -412,7 +421,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtMeasuredTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? YieldPointAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YieldPointAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // YPL Yield Stress at measured T & P (Gaussian)
@@ -429,6 +438,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.IsComputedBy, "YPLModelFitter")]
+        [SemanticFact("YPLModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLYieldStressAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -443,12 +453,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldStress, "RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -481,7 +490,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYPLYieldStressAtMeasuredTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? YPLYieldStressAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLYieldStressAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // YPL Consistency Index at measured T & P (Gaussian)
@@ -493,17 +502,18 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Nouns.Enum.ComputedData)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP")]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.DynamicViscosity)]
+        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology)]
         [SemanticFact("topSideTelemetry", Nouns.Enum.TopSideTelemetry)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsComputedBy, "YPLModelFitter")]
+        [SemanticFact("YPLModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Nouns.Enum.DrillingDataPoint)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasDynamicValue, "Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP")]
-        [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.DynamicViscosity)]
+        [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology)]
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Nouns.Enum.GaussianUncertainty)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasUncertainty, "GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01")]
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasUncertaintyMean, "RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01")]
@@ -512,12 +522,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldPowerLawConsistencyIndex, "RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -550,7 +559,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtMeasuredTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? YPLConsistencyIndexAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLConsistencyIndexAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // YPL Flow Behavior Index at measured T & P (Gaussian)
@@ -567,6 +576,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.IsComputedBy, "YPLModelFitter")]
+        [SemanticFact("YPLModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -581,12 +591,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldPowerLawFlowBehaviorIndex, "RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -619,18 +628,18 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitMeasuredPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitMeasuredTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtMeasuredTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitMeasuredPressure#01")]
-        public GaussianDrillingProperty? YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
-        // Extrapolated Temperature (Dirac / deterministic)
-        // NOTE: ScalarDrillingProperty is used to align with SemanticDiracVariable.
-        // If your libs use a different deterministic type, replace accordingly.
+        // Selected temperature parameter for extrapolation (Dirac / deterministic).
+        // It is linked as an input to each computation that uses it below.
         // --------------------------------------------------------------------
         [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
         [Mandatory(CommonProperty.MandatoryType.General)]
         [SemanticDiracVariable("RheoSenseAtActivePitExtrapolatedTemperature")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature", Nouns.Enum.DynamicDrillingSignal)]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitExtrapolatedTemperature")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
@@ -642,16 +651,18 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        public ScalarDrillingProperty? ExtrapolatedTemperature { get; set; } = null;
+        public ScalarProperty? ExtrapolatedTemperature { get; set; } = null;
 
         // --------------------------------------------------------------------
-        // Extrapolated Pressure (Dirac / deterministic)
+        // Selected pressure parameter for extrapolation (Dirac / deterministic).
+        // It is linked as an input to each computation that uses it below.
         // --------------------------------------------------------------------
         [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
         [Mandatory(CommonProperty.MandatoryType.General)]
         [SemanticDiracVariable("RheoSenseAtActivePitExtrapolatedPressure")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure", Nouns.Enum.DynamicDrillingSignal)]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitExtrapolatedPressure")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
@@ -663,7 +674,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        public ScalarDrillingProperty? ExtrapolatedPressure { get; set; } = null;
+        public ScalarProperty? ExtrapolatedPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Flow curve at extrapolated T & P (JSON) -> ComputedData
@@ -680,13 +691,13 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("FlowCurveEstimatorAtExtrapolatedPressureAndTemperature", Nouns.Enum.Estimator)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "FlowCurveEstimatorAtExtrapolatedPressureAndTemperature")]
+        [SemanticFact("FlowCurveEstimatorAtExtrapolatedPressureAndTemperature", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -697,22 +708,24 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
 
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "FlowCurveEstimatorAtExtrapolatedPressureAndTemperature")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "FlowCurveEstimatorAtExtrapolatedPressureAndTemperature")]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
         public FlowCurve? FlowCurveAtExtrapolatedTemperatureAndPressure { get; set; } = null;
@@ -732,6 +745,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -746,12 +760,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("binghamPlastic", Nouns.Enum.BinghamPlastic)]
         [SemanticFact("binghamPlastic", Verbs.Enum.HasPlasticViscosity, "RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -762,25 +775,27 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
 
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitPlasticViscosityAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
-        public GaussianDrillingProperty? PlasticViscosityAtExtrapolatedTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? PlasticViscosityAtExtrapolatedTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Yield Point at extrapolated T & P (Gaussian, Bingham) -> ComputedData
@@ -797,6 +812,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldPointAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -811,12 +827,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("binghamPlastic", Nouns.Enum.BinghamPlastic)]
         [SemanticFact("binghamPlastic", Verbs.Enum.HasYieldPoint, "RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -827,25 +842,27 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
 
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "BinghamPlasticAtExtrapolatedPressureAndTemperatureModelFitter")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYieldPointAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
-        public GaussianDrillingProperty? YieldPointAtExtrapolatedTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YieldPointAtExtrapolatedTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // YPL Yield Stress at extrapolated T & P  -> ComputedData, Gaussian
@@ -862,6 +879,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldStressAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -876,12 +894,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldStress, "RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -891,25 +908,27 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYieldStressAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
-        public GaussianDrillingProperty? YPLYieldStressAtExtrapolatedTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLYieldStressAtExtrapolatedTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // YPL Consistency Index at extrapolated T & P  -> ComputedData, Gaussian
@@ -921,17 +940,18 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Nouns.Enum.ComputedData)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP")]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.DynamicViscosity)]
+        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology)]
         [SemanticFact("topSideTelemetry", Nouns.Enum.TopSideTelemetry)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Nouns.Enum.DrillingDataPoint)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasDynamicValue, "Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP")]
-        [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.DynamicViscosity)]
+        [SemanticFact("Sigma_RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsOfMeasurableQuantity, BasePhysicalQuantity.QuantityEnum.ConsistencyIndexRheology)]
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Nouns.Enum.GaussianUncertainty)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasUncertainty, "GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01")]
         [SemanticFact("GaussianUncertaintyRheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasUncertaintyMean, "RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01")]
@@ -940,12 +960,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldPowerLawConsistencyIndex, "RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -955,25 +974,27 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYPLConsistencyIndexAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
-        public GaussianDrillingProperty? YPLConsistencyIndexAtExtrapolatedTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLConsistencyIndexAtExtrapolatedTemperatureAndPressure { get; set; } = null;
 
         // --------------------------------------------------------------------
         // Extrapolated TP-dependent outputs: mark as ComputedData and depend on the extrapolated nodes
@@ -992,6 +1013,7 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Nouns.Enum.ModelFitter)]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsComputedBy, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("YPLAtExtrapolatedPressureAndTemperatureModelFitter", Verbs.Enum.IsSubSystemOf, "RheoSenseAtActivePitMeasurementDevice#01")]
         // Uncertainty
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
         [SemanticFact("Sigma_RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Nouns.Enum.DrillingDataPoint)]
@@ -1006,12 +1028,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("YPL", Nouns.Enum.YieldPowerLaw)]
         [SemanticFact("YPL", Verbs.Enum.HasYieldPowerLawFlowBehaviorIndex, "RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01")]
         [SemanticFact("DifferentialPressureMeasurementPrinciple", Nouns.Enum.DifferentialPressureMeasurementPrinciple)]
-        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.UsesFlowMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
+        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.UsesMeasurementPrinciple, "DifferentialPressureMeasurementPrinciple")]
         [SemanticFact("horizontalReferenceFrame", Nouns.Enum.HorizontalDirectionFrame)]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredFromReferenceFrame, "horizontalReferenceFrame")]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.MeasurementDevice)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Nouns.Enum.HydraulicLogicalElement)]
-        [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsMeasuredBy, "RheoSenseAtActivePitMeasurementDevice#01")]
         [SemanticFact("ActivePitLogical#01", Nouns.Enum.ActivePitLogical)]
         [SemanticFact("RheoSenseAtActivePitMeasurementDevice#01", Verbs.Enum.IsHydraulicConnectedTo, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
@@ -1021,24 +1042,26 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
         [SemanticFact("IntelligentMudSystem#01", Nouns.Enum.InstrumentationCompany)]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.TemperatureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ProcessFeature)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.DrillingDataPoint)]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.EstimationParameter)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Nouns.Enum.ContinuousDataType)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsOfMeasurableQuantity, DrillingPhysicalQuantity.QuantityEnum.PressureDrilling)]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsTransmittedBy, "topSideTelemetry")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsAssociatedToHydraulicBranch, "inletHydraulicBranch#01")]
-        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsHydraulicallyLocatedAt, "ActivePitLogical#01")]
         [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsProvidedBy, "IntelligentMudSystem#01")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedTemperature#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
+        [SemanticFact("RheoSenseAtActivePitExtrapolatedPressure#01", Verbs.Enum.IsComputationInput, "YPLAtExtrapolatedPressureAndTemperatureModelFitter")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.HasTemperatureReference, "RheoSenseAtActivePitExtrapolatedTemperature#01")]
         [SemanticFact("RheoSenseAtActivePitYPLFlowBehaviorIndexAtExtrapolatedTP#01", Verbs.Enum.HasPressureReference, "RheoSenseAtActivePitExtrapolatedPressure#01")]
-        public GaussianDrillingProperty? YPLFlowBehaviorIndexAtExtrapolatedTemperatureAndPressure { get; set; } = null;
+        public GaussianProperty? YPLFlowBehaviorIndexAtExtrapolatedTemperatureAndPressure { get; set; } = null;
     }
 }

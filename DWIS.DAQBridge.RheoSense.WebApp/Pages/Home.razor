@@ -1,0 +1,32 @@
+@page "/"
+@page "/Home"
+@inject IConfiguration AppConfiguration
+
+<MudUnitAndReferenceChoiceTag HttpHost="@UnitConversionHost"
+                              HttpBasePath="UnitConversion/api/"
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@unitSystemName"
+                              UnitSystemNameChanged="@OnUnitSystemChanged"
+                              EnableDateTimeReference="true"
+                              DateReferenceName="@dateReferenceName"
+                              DateReferenceNameChanged="@OnDateReferenceChanged">
+    <RheoSenseDashboard UnitSystemName="@unitSystemName"
+                        DateReferenceName="@dateReferenceName" />
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    private string unitSystemName = "Metric";
+    private string dateReferenceName = "UTC";
+
+    private string UnitConversionHost => AppConfiguration["UnitConversionHostURL"] ?? "https://app.digiwells.no/";
+
+    private void OnUnitSystemChanged(string value)
+    {
+        unitSystemName = value;
+    }
+
+    private void OnDateReferenceChanged(string value)
+    {
+        dateReferenceName = value == "Local Time" ? "Local Time" : "UTC";
+    }
+}

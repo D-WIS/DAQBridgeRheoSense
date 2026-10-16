@@ -1,0 +1,137 @@
+# D-WIS Bridge for RheoSense
+
+This solution bridges two independent RheoSense inline pipe rheometers into the
+D-WIS Blackboard: one at the active pit and one in the return flow line. Both
+sensors use the same engineering data types, while their OPC-UA endpoints,
+semantic identities, measurement devices, hydraulic locations, refresh state,
+logs, and history remain separate.
+
+All canonical engineering and persisted values use SI units. All timestamps are
+stored as UTC instants.
+
+## Solution projects
+
+| Project | Purpose |
+| --- | --- |
+| [Model](DWIS.DAQBridge.RheoSense.Model/README.md) | Shared OPC-UA input contract, semantic outputs, rheology mapping, configuration, compact logging, and Blackboard history. |
+| [Server](DWIS.DAQBridge.RheoSense.Server/README.md) | Production bridge from both RheoSense OPC-UA tag sets to semantic Blackboard outputs. |
+| [OPCUASource](DWIS.DAQBridge.RheoSense.OPCUASource/README.md) | Synthetic two-sensor OPC-UA source for development and end-to-end testing. |
+| [BlackboardSink](DWIS.DAQBridge.RheoSense.BlackboardSink/README.md) | Diagnostic semantic consumer used to verify Blackboard publication. |
+| [WebApp](DWIS.DAQBridge.RheoSense.WebApp/README.md) | MudBlazor dashboard for conditions, fitted YPL parameters, and flow curves. |
+| [Tests](DWIS.DAQBridge.RheoSense.Tests/README.md) | xUnit coverage for mapping, semantics, configuration, logging, history, and WebApp data preparation. |
+
+## Data flow
+
+1. Each RheoSense instrument exposes numerical values through its configured
+   OPC-UA tags. Means and standard deviations use separate tags.
+2. The server polls both sensors but processes only a sensor channel whose data
+   changed since its last successful publication.
+3. Numerical shear-stress points are fitted to a Yield-Power-Law model using
+   Mullineux, with Zamora/Kelessidis as fallback.
+4. The server publishes the fitted physical flow curve and simulated Fann 35
+   Couette response, together with fitted YPL parameters and condition data.
+5. Compact raw and published records are written to disk and retained in
+   rotating 48-hour OPC-UA history buckets on the Blackboard.
+6. The WebApp reads published Blackboard history and presents unit- and
+   time-reference-aware trends and rheograms.
+
+RheoSense supplies no flow-curve object over OPC-UA. The curves are bridge
+outputs constructed from the ten shear-stress values at 3, 6, 10, 20, 30, 60,
+100, 200, 300, and 600 RPM.
+
+## Shared configuration
+
+The worker applications and WebApp use [`home/config.json`](home/config.json).
+In Linux containers it is located at `/home/config.json`; mount `/home` as a
+persistent volume. Important settings include:
+
+- `OPCUAURL`: RheoSense OPC-UA endpoint, default
+  `opc.tcp://localhost:48030`.
+- `GeneralBlackboard`: D-WIS Blackboard OPC-UA endpoint.
+- `ActivePitTags` and `FlowLineTags`: independent per-signal namespace, complete
+  node ID, and optional unit-conversion maps.
+- `OPCUALoopDuration` and `ConnectionRetryInterval`: polling and recovery
+  periods.
+- `EnableDataLogging`, `DataLogDirectory`, `DataLogSegmentDuration`, and
+  `MaximumDataLogStorageBytes`: compact-log behavior.
+- `WebAppTimeSpanHours`: persisted dashboard window from 1 to 48 hours.
+- `SimulationConditionGenerationPeriod`, `SimulationDataGenerationPeriod`, and
+  `SimulationOPCUAPublishPeriod`: synthetic-source timing.
+
+There are 36 value endpoints and 34 optional standard-deviation endpoints per
+sensor. `ExtrapolatedTemperature` and `ExtrapolatedPressure` are chosen
+calculation parameters, not measurements, and therefore have no deviation
+tags. Missing signal entries or fields receive sensor-specific defaults. The
+per-signal maps are the sole configurable source of namespaces and node IDs.
+
+Raw OPC-UA tag names containing `Extraplated` retain the instrument's spelling.
+Semantic output names use `Extrapolated`.
+
+## Connection recovery and change detection
+
+The production server starts its exchange loop only after both OPC-UA and
+Blackboard connections are established. It waits and retries if either service
+is unavailable. A lost connection stops the exchange loop; processing resumes
+only after both connections recover and semantic outputs are registered again.
+
+Each sensor independently tracks condition data and rheology data. Re-reading
+unchanged OPC-UA values does not cause calculation, disk logging, history
+updates, or Blackboard publication.
+
+## Logs and history
+
+The server writes four compact JSON Lines streams beneath `DataLogDirectory`:
+
+- `rheosense-active-pit-raw-*`
+- `rheosense-active-pit-published-*`
+- `rheosense-flow-line-raw-*`
+- `rheosense-flow-line-published-*`
+
+Each record contains a UTC timestamp, refreshed channel, and streamlined values
+without semantic metadata or SPARQL queries. Completed six-hour files are
+zipped. Total storage defaults to 1 GiB; oldest files are permanently deleted
+when necessary to enforce the limit.
+
+The server also stores raw and published entries in eight rotating six-hour
+buckets per sensor and data kind on the OPC-UA part of the Blackboard. Node IDs
+follow `RheoSense.<ActivePit|FlowLine>.<Raw|Published>.History.<0-7>`. The WebApp
+reads the 16 published buckets; raw buckets remain available for diagnostics.
+
+## Build and test
+
+Prerequisites are the .NET 8 SDK and, for container builds, Docker.
+
+```powershell
+dotnet restore .\DWIS.DAQBridge.RheoSense.sln
+dotnet build .\DWIS.DAQBridge.RheoSense.sln --no-restore
+dotnet test .\DWIS.DAQBridge.RheoSense.sln --no-build
+```
+
+## Typical local flow
+
+1. Start an OPC-UA server and a D-WIS Blackboard using the addresses in
+   `home/config.json`.
+2. Run `DWIS.DAQBridge.RheoSense.OPCUASource` to publish synthetic input data.
+3. Run `DWIS.DAQBridge.RheoSense.Server`.
+4. Optionally run `DWIS.DAQBridge.RheoSense.BlackboardSink` for console-level
+   semantic verification.
+5. Run `DWIS.DAQBridge.RheoSense.WebApp` and open
+   `http://localhost:5080/RheoSense/webapp`.
+
+The WebApp's OSDC unit and time-reference selector defaults to the unit service
+at `https://app.digiwells.no/`. Override `UnitConversionHostURL` when another
+service deployment is required.
+
+## Docker images
+
+The workflow in
+[`.github/workflows/docker-build-push.yml`](.github/workflows/docker-build-push.yml)
+runs on pushes to `main` and by manual dispatch. It publishes both `stable` and
+immutable `sha-<commit>` tags for:
+
+- `digiwells/dwisdaqbridgerheosenseserver`
+- `digiwells/dwisdaqbridgerheosenseopcuasource`
+- `digiwells/dwisdaqbridgerheosensewebapp`
+
+The repository requires `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD` GitHub
+Actions secrets. Docker builds use the repository root as their context.
