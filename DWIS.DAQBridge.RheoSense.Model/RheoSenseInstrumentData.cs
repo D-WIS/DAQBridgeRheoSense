@@ -72,6 +72,11 @@ public sealed class RheoSenseInstrumentData : DWISDataWithOPCUA
     public ScalarDrillingProperty? YPLConsistencyIndexAtExtraplatedTemperatureAndPressure { get; set; }
     public ScalarDrillingProperty? YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure { get; set; }
 
+    public ScalarDrillingProperty? GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure { get; set; }
+    public ScalarDrillingProperty? GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure { get; set; }
+    public ScalarDrillingProperty? GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure { get; set; }
+    public ScalarDrillingProperty? GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure { get; set; }
+
     private static IReadOnlyDictionary<PropertyInfo, OPCUANode> BuildInstrumentNodes(
         string nameSpace,
         string nodeIdPrefix,

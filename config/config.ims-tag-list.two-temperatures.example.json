@@ -1,0 +1,815 @@
+{
+  "OPCUALoopDuration": "00:00:01",
+  "LoopDuration": "00:00:01",
+  "ConnectionRetryInterval": "00:00:05",
+  "GeneralBlackboard": "opc.tcp://localhost:48030",
+  "OPCUAURL": "opc.tcp://172.31.5.2:55105",
+  "InitializeOPCUAVariables": false,
+  "UnitConversionServiceUrl": "http://localhost:5002/unitconversion/api/",
+  "Sources": [
+    {
+      "Id": "ActivePit",
+      "Placement": "ActivePit",
+      "RigId": "configure-rig-id",
+      "Enabled": false
+    }
+  ],
+  "ActivePitTags": {
+    "Signals": {
+      "MeasuredTemperature": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.t_inlet_m",
+        "UnitName": "celsius"
+      },
+      "MeasuredPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.rho_e_m",
+        "UnitName": "specific gravity"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.rho_vs_e",
+        "UnitName": "specific gravity"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_3rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_6rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_10rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_20rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_30rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_60rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_100rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_200rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_300rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_600rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.PV",
+        "UnitName": "centipoise"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.YP"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ExtrapolatedTemperature": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "ConstantValue": 50,
+        "UnitName": "celsius"
+      },
+      "ExtrapolatedPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_3rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_6rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_10rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_20rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_30rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_60rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_100rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_200rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_300rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_600rpm_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.my_pv_e",
+        "UnitName": "centipoise"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.my_yp_e"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.gel10sec",
+        "UnitName": "pound per 100 square foot"
+      },
+      "GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.gel10min",
+        "UnitName": "pound per 100 square foot"
+      },
+      "GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_gel10sec_e",
+        "UnitName": "pound per 100 square foot"
+      },
+      "GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP.a_gel10min_e",
+        "UnitName": "pound per 100 square foot"
+      }
+    },
+    "StandardDeviationSignals": {
+      "MeasuredTemperature": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "MeasuredPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YieldPointAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YieldPointAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      },
+      "GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure": {
+        "Enabled": false,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+      }
+    },
+    "AdditionalExtrapolations": [
+      {
+        "Id": "HighTemperature",
+        "Tags": {
+          "Signals": {
+            "MeasuredTemperature": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.t_inlet_m",
+              "UnitName": "celsius"
+            },
+            "MeasuredPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.rho_e_m",
+              "UnitName": "specific gravity"
+            },
+            "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.rho_vs_e",
+              "UnitName": "specific gravity"
+            },
+            "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_3rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_6rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_10rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_20rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_30rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_60rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_100rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_200rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_300rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.a_600rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.PV",
+              "UnitName": "centipoise"
+            },
+            "YieldPointAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.YP"
+            },
+            "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ExtrapolatedTemperature": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "ConstantValue": 150,
+              "UnitName": "fahrenheit"
+            },
+            "ExtrapolatedPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_3rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_6rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_10rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_20rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_30rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_60rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_100rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_200rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_300rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_600rpm_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.my_pv_e",
+              "UnitName": "centipoise"
+            },
+            "YieldPointAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.my_yp_e"
+            },
+            "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.gel10sec",
+              "UnitName": "pound per 100 square foot"
+            },
+            "GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.HMIDualDPData.gel10min",
+              "UnitName": "pound per 100 square foot"
+            },
+            "GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_gel10sec_e",
+              "UnitName": "pound per 100 square foot"
+            },
+            "GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure": {
+              "Enabled": true,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+              "NodeID": "S71500ET200MP station_1.RSS_PLC.APIDualDP150.a_gel10min_e",
+              "UnitName": "pound per 100 square foot"
+            }
+          },
+          "StandardDeviationSignals": {
+            "MeasuredTemperature": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "MeasuredPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "MassDensityFromCoriolisAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "MassDensityFromVerticalPipeAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt3RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt6RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt10RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt20RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt30RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt60RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt100RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt200RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt300RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt600RPMAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "PlasticViscosityAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YieldPointAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLYieldStressAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLConsistencyIndexAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt20RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt30RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt60RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt100RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt200RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt300RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "ShearStressAt600RPMAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "PlasticViscosityAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YieldPointAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLYieldStressAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLConsistencyIndexAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            },
+            "GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure": {
+              "Enabled": false,
+              "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6"
+            }
+          }
+        }
+      }
+    ],
+    "StateSignals": {
+      "Gel10SecondsActive": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.StateSystem.GelActive10SecAuto"
+      },
+      "Gel10MinutesActive": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.StateSystem.GelActive"
+      },
+      "Automatic": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.StateSystem.DualDPAuto"
+      },
+      "RunningHeartbeat": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.StateSystem.Running"
+      },
+      "OperatingHours": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.OperationTime.Hours"
+      },
+      "OperationTime": {
+        "Enabled": true,
+        "NameSpace": "urn:ims:replace-with-actual-namespace-uri-at-index-6",
+        "NodeID": "S71500ET200MP station_1.RSS_PLC.StateData.OperationTime"
+      }
+    }
+  },
+  "HeartbeatTimeout": "00:00:10"
+}

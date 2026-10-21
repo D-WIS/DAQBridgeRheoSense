@@ -1,0 +1,52 @@
+{
+  "OPCUAURL": "opc.tcp://localhost:48031",
+  "GeneralBlackboard": "opc.tcp://localhost:48030",
+  "LoopDuration": "00:00:01",
+  "OPCUALoopDuration": "00:00:01",
+  "Sources": [
+    {
+      "Id": "ActivePit",
+      "Placement": "ActivePit",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "ReservePit",
+      "Placement": "ReservePit",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "SlugPit",
+      "Placement": "SlugPit",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "TripTank",
+      "Placement": "TripTank",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "SuctionManifold",
+      "Placement": "SuctionManifold",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "FlowLine",
+      "Placement": "ReturnBeforeShakers",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "ReturnAfterShakers",
+      "Placement": "ReturnAfterShakers",
+      "Enabled": true,
+      "RigId": "local-rig"
+    }
+  ],
+  "UnitConversionServiceUrl": null,
+  "HeartbeatTimeout": "00:00:10"
+}

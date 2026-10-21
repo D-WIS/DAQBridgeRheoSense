@@ -589,5 +589,51 @@
         "NodeID": "RheoSenseFlowLineDataManifest.Sigma_YPLFlowBehaviorIndexAtExtraplatedTemperatureAndPressure"
       }
     }
-  }
+  },
+  "Sources": [
+    {
+      "Id": "ActivePit",
+      "Placement": "ActivePit",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "ReservePit",
+      "Placement": "ReservePit",
+      "Enabled": false,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "SlugPit",
+      "Placement": "SlugPit",
+      "Enabled": false,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "TripTank",
+      "Placement": "TripTank",
+      "Enabled": false,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "SuctionManifold",
+      "Placement": "SuctionManifold",
+      "Enabled": false,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "FlowLine",
+      "Placement": "ReturnBeforeShakers",
+      "Enabled": true,
+      "RigId": "local-rig"
+    },
+    {
+      "Id": "ReturnAfterShakers",
+      "Placement": "ReturnAfterShakers",
+      "Enabled": false,
+      "RigId": "local-rig"
+    }
+  ],
+  "UnitConversionServiceUrl": null,
+  "HeartbeatTimeout": "00:00:10"
 }

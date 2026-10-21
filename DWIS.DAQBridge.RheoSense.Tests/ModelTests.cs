@@ -19,12 +19,12 @@ public class ModelTests
 
         Assert.IsNotAssignableFrom<DWISDataWithOPCUA>(activePit);
         Assert.IsNotAssignableFrom<DWISDataWithOPCUA>(flowLine);
-        Assert.Equal(18, activePit.Manifests.Value.Count);
-        Assert.Equal(18, flowLine.Manifests.Value.Count);
+        Assert.Equal(22, activePit.Manifests.Value.Count);
+        Assert.Equal(22, flowLine.Manifests.Value.Count);
     }
 
     [Fact]
-    public void Each_instrument_exposes_the_36_numeric_OPCUA_values()
+    public void Each_instrument_exposes_the_40_numeric_OPCUA_values()
     {
         RheoSenseInstrumentData activePit = new(
             RheoSenseConstants.ActivePitNamespace,
@@ -33,8 +33,8 @@ public class ModelTests
             RheoSenseConstants.FlowLineNamespace,
             RheoSenseConstants.FlowLineNodePrefix);
 
-        Assert.Equal(36, activePit.OPCUANodes.Value.Count);
-        Assert.Equal(36, flowLine.OPCUANodes.Value.Count);
+        Assert.Equal(40, activePit.OPCUANodes.Value.Count);
+        Assert.Equal(40, flowLine.OPCUANodes.Value.Count);
         Assert.All(activePit.OPCUANodes.Value.Keys, property => Assert.Equal(typeof(ScalarDrillingProperty), property.PropertyType));
         Assert.True(ExpectedInstrumentTags.SetEquals(activePit.OPCUANodes.Value.Values.Select(node => node.ID)));
         Assert.True(ExpectedInstrumentTags.SetEquals(flowLine.OPCUANodes.Value.Values.Select(node => node.ID)));
@@ -59,7 +59,7 @@ public class ModelTests
             RheoSenseConstants.ActivePitStandardDeviationNodePrefix,
             includeExtrapolationParameters: false);
 
-        Assert.Equal(34, deviations.OPCUANodes.Value.Count);
+        Assert.Equal(38, deviations.OPCUANodes.Value.Count);
         Assert.DoesNotContain(
             deviations.OPCUANodes.Value.Keys,
             property => property.Name is nameof(RheoSenseInstrumentData.ExtrapolatedTemperature) or
@@ -182,7 +182,7 @@ public class ModelTests
     {
         Assert.Equal(
             typeof(FlowCurve),
-            typeof(ActivePitOutputData).GetProperty(nameof(ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure))!.PropertyType);
+            typeof(RheometerOutputData).GetProperty(nameof(ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure))!.PropertyType);
         Assert.Equal(
             typeof(FlowCurve),
             typeof(FlowLineOutputData).GetProperty(nameof(FlowLineOutputData.FlowCurveAtMeasuredTemperatureAndPressure))!.PropertyType);
@@ -222,10 +222,10 @@ public class ModelTests
         Assert.NotSame(configuration.ActivePitTags.StandardDeviationSignals, configuration.FlowLineTags.StandardDeviationSignals);
         Assert.NotSame(configuration.ActivePitTags.UnitConversions, configuration.FlowLineTags.UnitConversions);
         Assert.NotSame(configuration.ActivePitTags.StandardDeviationUnitConversions, configuration.FlowLineTags.StandardDeviationUnitConversions);
-        Assert.Equal(36, configuration.ActivePitTags.Signals.Count);
-        Assert.Equal(34, configuration.ActivePitTags.StandardDeviationSignals.Count);
-        Assert.Equal(36, configuration.FlowLineTags.Signals.Count);
-        Assert.Equal(34, configuration.FlowLineTags.StandardDeviationSignals.Count);
+        Assert.Equal(40, configuration.ActivePitTags.Signals.Count);
+        Assert.Equal(38, configuration.ActivePitTags.StandardDeviationSignals.Count);
+        Assert.Equal(40, configuration.FlowLineTags.Signals.Count);
+        Assert.Equal(38, configuration.FlowLineTags.StandardDeviationSignals.Count);
         Assert.DoesNotContain(nameof(RheoSenseInstrumentData.ExtrapolatedTemperature), configuration.ActivePitTags.StandardDeviationSignals.Keys);
         Assert.DoesNotContain(nameof(RheoSenseInstrumentData.ExtrapolatedPressure), configuration.ActivePitTags.StandardDeviationSignals.Keys);
     }
@@ -891,6 +891,11 @@ public class ModelTests
         "YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure",
         "ExtrapolatedTemperature",
         "ExtrapolatedPressure",
+        "GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure",
+        "GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure",
+        "GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure",
+        "GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure",
+
         "ShearStressAt3RPMAtExtraplatedTemperatureAndPressure",
         "ShearStressAt6RPMAtExtraplatedTemperatureAndPressure",
         "ShearStressAt10RPMAtExtraplatedTemperatureAndPressure",

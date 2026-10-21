@@ -28,6 +28,34 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
     {
     }
 
+    protected override Task RegisterToOPCUA(DWISDataWithOPCUA data, string manifestName, string companyName)
+    {
+        if (data is not RheoSenseInstrumentData && data is not RheoSenseStateData) return base.RegisterToOPCUA(data, manifestName, companyName);
+        if (_OPCUAClient?.Inject(RheoSenseInputManifest.Create(data, manifestName))?.Success != true)
+            throw new InvalidOperationException("Could not register RheoSense source variables.");
+        return Task.CompletedTask;
+    }
+
+    protected Task ReadStatesAsync(RheoSenseStateData data)
+    {
+        foreach (var (property, node) in data.OPCUANodes.Value)
+        {
+            double? value = null;
+            if (!string.IsNullOrWhiteSpace(node.NameSpace) && _OPCUAClient?.ReadAnyVariables(out var values, new[] { (node.NameSpace, node.PrefixID + node.ID) }) == true && values.Length > 0)
+            {
+                var raw = values[0];
+                if (raw is bool flag) value = flag ? 1 : 0;
+                else if (raw is byte or short or ushort or int or uint or long or ulong or float or double or decimal)
+                {
+                    double number = Convert.ToDouble(raw, System.Globalization.CultureInfo.InvariantCulture);
+                    if (double.IsFinite(number)) value = number;
+                }
+            }
+            property.SetValue(data, new ScalarDrillingProperty { ScalarValue = value });
+        }
+        return Task.CompletedTask;
+    }
+
     protected override async Task PublishOPCUAAsync(
         DWISDataWithOPCUA data,
         string? configuredNamespace,
@@ -57,7 +85,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             null,
             null,
             null,
-            tags.UnitConversions,
+            tags.GetConversions(),
             property => true,
             stoppingToken,
             tags,
@@ -75,7 +103,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             null,
             null,
             null,
-            tags.UnitConversions,
+            tags.GetConversions(),
             property => RheoSenseDataChannels.IsInChannel(property.Name, channel),
             stoppingToken,
             tags,
@@ -92,7 +120,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             null,
             null,
             null,
-            tags.StandardDeviationUnitConversions,
+            tags.GetConversions(true),
             property => true,
             stoppingToken,
             tags,
@@ -110,7 +138,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             null,
             null,
             null,
-            tags.StandardDeviationUnitConversions,
+            tags.GetConversions(true),
             property => RheoSenseDataChannels.IsInChannel(property.Name, channel),
             stoppingToken,
             tags,
@@ -160,6 +188,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             }
 
             RheoSenseOPCUATagDefinition? definition = tagSet?.Resolve(property.Name, standardDeviation);
+            if (definition is { Enabled: false } || definition?.ConstantValue is not null) continue;
             string? ns = definition?.NameSpace ?? GetNameSpace(node, configuredNamespace);
             string? id = definition?.NodeID ?? GetID(node, configuredPrefix, configuredIds);
             if (string.IsNullOrWhiteSpace(ns) || string.IsNullOrWhiteSpace(id))
@@ -188,9 +217,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             return;
         }
 
-        Dictionary<string, UnitConversion> unitConversions = standardDeviation
-            ? tags.StandardDeviationUnitConversions
-            : tags.UnitConversions;
+        Dictionary<string, UnitConversion> unitConversions = tags.GetConversions(standardDeviation);
         foreach ((PropertyInfo property, _) in data.OPCUANodes.Value)
         {
             if (property.GetValue(data) is null)
@@ -200,15 +227,14 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
 
             object? propertyValue = property.GetValue(data);
             RheoSenseOPCUATagDefinition definition = tags.Resolve(property.Name, standardDeviation);
+            if (!definition.Enabled) { if (propertyValue is ScalarDrillingProperty disabled) disabled.ScalarValue = null; continue; }
             if (propertyValue is null || string.IsNullOrWhiteSpace(definition.NameSpace) || string.IsNullOrWhiteSpace(definition.NodeID))
             {
                 continue;
             }
 
-            if (_OPCUAClient.ReadAnyVariables(
-                    out object[] values,
-                    new[] { (definition.NameSpace, definition.NodeID) }) &&
-                values.Length > 0)
+            object[] values = definition.ConstantValue is double constant ? new object[] { constant } : Array.Empty<object>();
+            if (values.Length > 0 || _OPCUAClient.ReadAnyVariables(out values, new[] { (definition.NameSpace, definition.NodeID) }) && values.Length > 0)
             {
                 UnitConversion conversion = TryGetUnitConversion(
                     unitConversions,
@@ -351,6 +377,21 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
         }
     }
 
+    protected async Task InvalidateBlackboardAsync(DWISData data, CancellationToken token)
+    {
+        foreach (var (property, _) in data.Manifests.Value)
+        {
+            token.ThrowIfCancellationRequested();
+            if (!PlaceHolders.TryGetValue(property, out var targets) || targets.Count == 0) continue;
+            if (property.PropertyType == typeof(FlowCurve))
+            {
+                if (!SendValue(targets, "null")) throw new InvalidOperationException("Could not invalidate Blackboard flow curve.");
+            }
+            else for (int column = 0; column < targets[0].Count; column++) PublishBlackboardValue(targets, column, double.NaN);
+            await Task.Yield();
+        }
+    }
+
     private void PublishBlackboardValue(QueryResult targets, int column, double? value)
     {
         if (_DWISClient is null || value is null || targets.Count == 0 || targets[0].Count <= column)
@@ -364,7 +405,8 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
             return;
         }
 
-        _DWISClient.UpdateAnyVariables(new[] { (target.NameSpace, target.ID, (object)value.Value, DateTime.UtcNow) });
+        if (!_DWISClient.UpdateAnyVariables(new[] { (target.NameSpace, target.ID, (object)value.Value, DateTime.UtcNow) }))
+            throw new InvalidOperationException("Could not publish Blackboard value.");
     }
 
     protected override void AssignValue(DWISData data, object propertyValue, object? value, DateTime? timeStamp)
@@ -390,6 +432,8 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
 
     private static bool DecodeValue(object propertyValue, object? value, UnitConversion conversion)
     {
+        if (propertyValue is ScalarDrillingProperty && value is float or decimal or short or ushort or int or uint or long or ulong or byte or sbyte)
+            value = Convert.ToDouble(value, System.Globalization.CultureInfo.InvariantCulture);
         if (propertyValue is ScalarDrillingProperty scalar && value is double scalarValue)
         {
             scalar.ScalarValue = conversion.ToSI(scalarValue);

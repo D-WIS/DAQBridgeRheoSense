@@ -7,28 +7,25 @@ namespace DWIS.DAQBridge.RheoSense.Server;
 
 public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 {
-    private readonly RheoSenseInstrumentData _activePitInput = new(
-        RheoSenseConstants.ActivePitNamespace,
-        RheoSenseConstants.ActivePitNodePrefix);
-    private readonly RheoSenseInstrumentData _flowLineInput = new(
-        RheoSenseConstants.FlowLineNamespace,
-        RheoSenseConstants.FlowLineNodePrefix);
-    private readonly RheoSenseInstrumentData _activePitStandardDeviationInput = new(
-        RheoSenseConstants.ActivePitNamespace,
-        RheoSenseConstants.ActivePitStandardDeviationNodePrefix,
-        includeExtrapolationParameters: false);
-    private readonly RheoSenseInstrumentData _flowLineStandardDeviationInput = new(
-        RheoSenseConstants.FlowLineNamespace,
-        RheoSenseConstants.FlowLineStandardDeviationNodePrefix,
-        includeExtrapolationParameters: false);
-    private readonly ActivePitOutputData _activePitOutput = new();
-    private readonly FlowLineOutputData _flowLineOutput = new();
+    private readonly List<SourceRuntime> sources = new();
+    private sealed class SourceRuntime(RheometerInstallation installation)
+    {
+        public RheometerSource Source { get; } = installation.Source;
+        public RheometerInstallation Installation { get; } = installation;
+        public RheoSenseOPCUATagSet Tags { get; } = installation.Tags;
+        public RheoSenseInstrumentData Input { get; } = new(installation.InputNamespace, installation.InputPrefix);
+        public RheoSenseInstrumentData Sigma { get; } = new(installation.InputNamespace, installation.InputPrefix + "Sigma_", false);
+        public RheometerOutputData Output { get; } = installation.ExtrapolationId is null ? new RheometerOutputData(installation.Source, installation.Tags.DisabledBinghamOutputs()) : new RheometerExtrapolationOutput(installation.Source, installation.ExtrapolationId);
+        public SensorProcessingState State { get; } = new();
+        public RheoSenseStateData States { get; } = new(installation.Source, installation.Tags);
+        public bool Inactive { get; set; }
+        public Dictionary<System.Reflection.PropertyInfo, DWIS.API.DTO.QueryResult> Targets { get; } = new();
+    }
+    private readonly Dictionary<string, RunningHeartbeatMonitor> heartbeats = new();
     private bool _opcConnectionNeedsRecovery;
     private bool _blackboardConnectionNeedsRecovery;
     private RheoSenseDataLogWriter? _dataLogWriter;
     private string? _dataLogSettingsKey;
-    private readonly SensorProcessingState _activePitState = new();
-    private readonly SensorProcessingState _flowLineState = new();
     private readonly RheoSenseBlackboardHistoryPublisher _historyPublisher = new();
 
     public Worker(
@@ -166,23 +163,31 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 
     private async Task InitializeConnectedSessionAsync()
     {
-        ConfigureOPCUANodes(_activePitInput, Configuration!.ActivePitTags);
-        ConfigureOPCUANodes(_flowLineInput, Configuration.FlowLineTags);
-        ConfigureOPCUANodes(_activePitStandardDeviationInput, Configuration.ActivePitTags, standardDeviation: true);
-        ConfigureOPCUANodes(_flowLineStandardDeviationInput, Configuration.FlowLineTags, standardDeviation: true);
-
-        if (Configuration!.InitializeOPCUAVariables)
+        Configuration!.ValidateSources();
+        sources.Clear();
+        heartbeats.Clear();
+        foreach (var installation in Configuration!.GetInstallations())
         {
-            await RegisterToOPCUA(_activePitInput, RheoSenseConstants.ActivePitManifest, RheoSenseConstants.Provider);
-            await RegisterToOPCUA(_flowLineInput, RheoSenseConstants.FlowLineManifest, RheoSenseConstants.Provider);
-            await RegisterToOPCUA(_activePitStandardDeviationInput, RheoSenseConstants.ActivePitStandardDeviationManifest, RheoSenseConstants.Provider);
-            await RegisterToOPCUA(_flowLineStandardDeviationInput, RheoSenseConstants.FlowLineStandardDeviationManifest, RheoSenseConstants.Provider);
+            var runtime = new SourceRuntime(installation);
+            await RheoSenseUnitConversions.ConfigureAsync(Configuration, runtime.Tags);
+            ConfigureOPCUANodes(runtime.Input, runtime.Tags);
+            ConfigureOPCUANodes(runtime.Sigma, runtime.Tags, standardDeviation: true);
+            if (Configuration.InitializeOPCUAVariables)
+            {
+                await RegisterToOPCUA(runtime.Input, installation.InputManifestName, RheoSenseConstants.Provider);
+                await RegisterToOPCUA(runtime.Sigma, installation.InputManifestName, RheoSenseConstants.Provider);
+            }
+            PlaceHolders = runtime.Targets;
+            await RegisterToBlackboard(runtime.Output, false);
+            if (_DWISClient!.Inject(runtime.Output.CreatePhysicalLocationManifest())?.Success != true)
+                throw new InvalidOperationException("Could not publish the shared physical-location identity.");
+            sources.Add(runtime);
+            if (installation.ExtrapolationId is null) heartbeats.Add(runtime.Source.Id, new());
+            PlaceHolders = runtime.Targets;
+            await InvalidateBlackboardAsync(runtime.Output, CancellationToken.None);
+            runtime.Inactive = true;
         }
-
-        PlaceHolders.Clear();
-        await RegisterToBlackboard(_activePitOutput, false);
-        await RegisterToBlackboard(_flowLineOutput, false);
-        _historyPublisher.Initialize(_DWISClient!);
+        if (sources.Count > 0) _historyPublisher.Initialize(_DWISClient!, sources.Select(s => s.Installation.HistoryId));
     }
 
     private async Task RunBridgeUntilDisconnectedAsync(CancellationToken stoppingToken)
@@ -196,44 +201,43 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
         {
             if (!ConnectionsAreEstablished)
             {
+                await InvalidateSourcesAsync(stoppingToken);
                 return;
             }
 
             try
             {
-                await ReadTagSetAsync(_activePitInput, Configuration.ActivePitTags);
-                await ReadTagSetAsync(_flowLineInput, Configuration.FlowLineTags);
-                await ReadOPCUAStandardDeviationTagSetAsync(_activePitStandardDeviationInput, Configuration.ActivePitTags);
-                await ReadOPCUAStandardDeviationTagSetAsync(_flowLineStandardDeviationInput, Configuration.FlowLineTags);
-
-                if (!ConnectionsAreEstablished)
+                foreach (var runtime in sources)
                 {
-                    return;
+                    var primary = sources.First(s => s.Source.Id == runtime.Source.Id && s.Installation.ExtrapolationId is null);
+                    if (runtime == primary) await ReadStatesAsync(primary.States);
+                    bool online = heartbeats[runtime.Source.Id].Observe(primary.States.RunningHeartbeat?.ScalarValue, DateTimeOffset.UtcNow, Configuration!.HeartbeatTimeout);
+                    PlaceHolders = runtime.Targets;
+                    if (!online)
+                    {
+                        if (!runtime.Inactive) await InvalidateBlackboardAsync(runtime.Output, stoppingToken);
+                        runtime.Inactive = true;
+                        continue;
+                    }
+                    if (runtime.Inactive)
+                    {
+                        runtime.State.ResetPublished();
+                        runtime.Inactive = false;
+                        Logger?.LogInformation("Heartbeat resumed for {Source}; restoring all output channels.", runtime.Installation.HistoryId);
+                    }
+                    await ReadTagSetAsync(runtime.Input, runtime.Tags);
+                    await ReadOPCUAStandardDeviationTagSetAsync(runtime.Sigma, runtime.Tags);
+                    if (!ConnectionsAreEstablished) return;
+                    PlaceHolders = runtime.Targets;
+                    await ProcessSensorAsync(runtime.Installation.HistoryId, runtime.Input, runtime.Sigma, runtime.Output, runtime.State, stoppingToken);
+                    if (!ConnectionsAreEstablished) return;
                 }
 
-                await ProcessSensorAsync(
-                    RheoSenseSensorPosition.ActivePit,
-                    _activePitInput,
-                    _activePitStandardDeviationInput,
-                    _activePitOutput,
-                    _activePitState,
-                    stoppingToken);
-                if (!ConnectionsAreEstablished)
-                {
-                    return;
-                }
-
-                await ProcessSensorAsync(
-                    RheoSenseSensorPosition.FlowLine,
-                    _flowLineInput,
-                    _flowLineStandardDeviationInput,
-                    _flowLineOutput,
-                    _flowLineState,
-                    stoppingToken);
             }
             catch (Exception ex)
             {
                 Logger?.LogError(ex, "Error in RheoSense bridge exchange.");
+                await InvalidateSourcesAsync(stoppingToken);
                 // The OPC Foundation client can temporarily retain Connected=true
                 // after an operation has failed with BadNotConnected. Force both
                 // transports through their reconnect path instead of trusting that
@@ -247,8 +251,20 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
         }
     }
 
+    private async Task InvalidateSourcesAsync(CancellationToken token)
+    {
+        if (_DWISClient?.Connected != true) return;
+        foreach (var runtime in sources)
+        {
+            PlaceHolders = runtime.Targets;
+            try { await InvalidateBlackboardAsync(runtime.Output, token); }
+            catch (Exception ex) when (ex is not OperationCanceledException) { Logger?.LogWarning(ex, "Could not invalidate outputs for {Source}", runtime.Source.Id); }
+            runtime.Inactive = true;
+        }
+    }
+
     private async Task ProcessSensorAsync<TOutput>(
-        RheoSenseSensorPosition sensor,
+        string sensor,
         RheoSenseInstrumentData input,
         RheoSenseInstrumentData standardDeviations,
         TOutput output,
@@ -258,6 +274,7 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
     {
         foreach (RheoSenseDataChannel channel in Enum.GetValues<RheoSenseDataChannel>())
         {
+            if (output is RheometerExtrapolationOutput && channel == RheoSenseDataChannel.DensityPressureTemperature) continue;
             RheoSenseInputSnapshot snapshot = RheoSenseInputSnapshot.Capture(input, standardDeviations, channel);
             if (snapshot.Equals(state.GetPublished(channel)))
             {
@@ -326,7 +343,7 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 
     private async Task LogRawDataAsync(
         DateTimeOffset timestampUtc,
-        RheoSenseSensorPosition sensor,
+        string sensor,
         RheoSenseInstrumentData values,
         RheoSenseInstrumentData standardDeviations,
         RheoSenseDataChannel channel)
@@ -349,7 +366,7 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 
     private async Task LogPublishedDataAsync(
         DateTimeOffset timestampUtc,
-        RheoSenseSensorPosition sensor,
+        string sensor,
         IRheoSenseOutputData output,
         RheoSenseDataChannel channel)
     {
@@ -400,6 +417,7 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 
     private sealed class SensorProcessingState
     {
+        public void ResetPublished() { _publishedDensityPressureTemperature = null; _publishedRheology = null; }
         private RheoSenseInputSnapshot? _publishedDensityPressureTemperature;
         private RheoSenseInputSnapshot? _publishedRheology;
         private RheoSenseInputSnapshot? _loggedDensityPressureTemperature;

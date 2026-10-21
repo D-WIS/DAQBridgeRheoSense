@@ -1,7 +1,8 @@
 # D-WIS Bridge for RheoSense
 
-This solution bridges two independent RheoSense inline pipe rheometers into the
-D-WIS Blackboard: one at the active pit and one in the return flow line. Both
+This solution bridges a configured list of RheoSense inline pipe rheometers into
+the D-WIS Blackboard. Defaults are the active pit and the return flow line between
+the annulus outlet and the shale shakers. These
 sensors use the same engineering data types, while their OPC-UA endpoints,
 semantic identities, measurement devices, hydraulic locations, refresh state,
 logs, and history remain separate.
@@ -14,7 +15,7 @@ stored as UTC instants.
 | Project | Purpose |
 | --- | --- |
 | [Model](DWIS.DAQBridge.RheoSense.Model/README.md) | Shared OPC-UA input contract, semantic outputs, rheology mapping, configuration, compact logging, and Blackboard history. |
-| [Server](DWIS.DAQBridge.RheoSense.Server/README.md) | Production bridge from both RheoSense OPC-UA tag sets to semantic Blackboard outputs. |
+| [Server](DWIS.DAQBridge.RheoSense.Server/README.md) | Production bridge from configured RheoSense OPC-UA tag sets to semantic Blackboard outputs. |
 | [OPCUASource](DWIS.DAQBridge.RheoSense.OPCUASource/README.md) | Synthetic two-sensor OPC-UA source for development and end-to-end testing. |
 | [BlackboardSink](DWIS.DAQBridge.RheoSense.BlackboardSink/README.md) | Diagnostic semantic consumer used to verify Blackboard publication. |
 | [WebApp](DWIS.DAQBridge.RheoSense.WebApp/README.md) | MudBlazor dashboard for conditions, fitted YPL parameters, and flow curves. |
@@ -24,7 +25,7 @@ stored as UTC instants.
 
 1. Each RheoSense instrument exposes numerical values through its configured
    OPC-UA tags. Means and standard deviations use separate tags.
-2. The server polls both sensors but processes only a sensor channel whose data
+2. The server polls enabled sensors but processes only a sensor channel whose data
    changed since its last successful publication.
 3. Numerical shear-stress points are fitted to a Yield-Power-Law model using
    Mullineux, with Zamora/Kelessidis as fallback.
@@ -61,7 +62,7 @@ include:
 - `SimulationConditionGenerationPeriod`, `SimulationDataGenerationPeriod`, and
   `SimulationOPCUAPublishPeriod`: synthetic-source timing.
 
-There are 36 value endpoints and 34 optional standard-deviation endpoints per
+There are 40 value endpoints and 38 optional standard-deviation endpoints per
 sensor. `ExtrapolatedTemperature` and `ExtrapolatedPressure` are chosen
 calculation parameters, not measurements, and therefore have no deviation
 tags. Missing signal entries or fields receive sensor-specific defaults. The
@@ -232,3 +233,46 @@ docker run -d --name rheosense-webapp --restart unless-stopped --pull always \
 ```
 
 Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
+
+## DWIS dependency and semantic update
+
+The bridge now uses Common Worker/Model 1.0.6, OPC Foundation client 2.2.52,
+DWIS vocabulary 1.0.175 and OSDC semantic-property framework 10.2.10 (latest stable
+versions verified from NuGet on 20 October 2026). Existing signal identities and
+persistent paths are retained. Instrument device nodes reference an InstrumentModel
+with ModelName and confirmed ModelIdentifier fields, using the same mechanism as BaseStar.
+
+
+Runtime manifests now describe individual curve representations, derivation inputs,
+correction purpose, compatibility targets and independent p/T conditions. See the
+[rheometry semantic contract](RHEOMETRY-SEMANTICS.md).
+
+## Configurable installations
+
+One attributed instrument model is composed with placement profiles. The source,
+bridge and sink process the enabled `Sources` list in `home/config.json`.
+See [placement profiles and configuration](PLACEMENT-PROFILES.md) for defaults, tag mappings,
+validation, identities and restart behavior.
+
+## OPC-UA units and IMS tag-list review
+
+See [unit configuration and commissioning findings](IMS-TAG-REVIEW.md).
+`UnitConversionServiceUrl` configures the OSDC API base URL. Per-tag `UnitName`
+resolves conversion coefficients before session exchange; `Enabled: false`
+suppresses unavailable inputs and `ConstantValue` supplies only fixed extrapolation
+conditions. Existing numeric conversions and SI simulator defaults remain supported.
+The two IMS example configs require commissioning and are disabled by default.
+
+Gel-strength support includes 10 s and 10 min tests at actual and extrapolated
+conditions, SI Pa conversion, source/target-specific history, and simulator values.
+AdditionalExtrapolations reuses one semantic contract for multiple target temperatures
+of the same instrument. The IMS combined template uses 50 C and 150 F, SG density,
+and disabled PV/YP inputs. See IMS-TAG-REVIEW.md in the repository root.
+
+Semantic model projects explicitly reference OSDC UnitConversion Conversion and
+Conversion.DrillingEngineering 3.4.5, matching the display host's catalog. Rebuild
+the semantic models together when changing catalog versions: enum values embedded
+in C# attributes must agree with the runtime catalog used by the generator. This
+alignment changes no OSDC catalog definitions and publishes no packages.
+
+Heartbeat supervision: `HeartbeatTimeout` in `../home/config.json` is a positive duration (default `"00:00:10"`). The bridge requires a change in `RunningHeartbeat` (1/2) before publishing. A frozen or unavailable heartbeat invalidates all current engineering outputs: Double nodes use NaN, JSON flow-curve nodes use the JSON text `null`. A heartbeat transition automatically republishes every output channel, including unchanged measurements. State mappings are configured per instrument in `StateSignals`: `Gel10SecondsActive`, `Gel10MinutesActive`, `Automatic`, `RunningHeartbeat`, `OperatingHours`, and `OperationTime`. They are read as separate PLC states, never rheology inputs or uncertainties. OperatingHours retains its vendor hour encoding; OperationTime has no documented encoding and is not interpreted. The simulator toggles RunningHeartbeat every second independently of measurement publication. Additional temperature targets share the physical instrument heartbeat.

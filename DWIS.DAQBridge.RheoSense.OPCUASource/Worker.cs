@@ -3,149 +3,84 @@ using DWIS.DAQBridge.RheoSense.Model;
 using DWIS.RigOS.Common.Worker;
 using OSDC.DotnetLibraries.Drilling.DrillingProperties;
 using OSDC.DotnetLibraries.General.Common;
-
 namespace DWIS.DAQBridge.RheoSense.OPCUASource;
-
-public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
+public class Worker(ILogger<IDWISWorker<ConfigurationForRheoSense>> logger, ILogger<DWISClientOPCF>? clientLogger)
+    : RheoSenseWorker<ConfigurationForRheoSense>(logger, clientLogger)
 {
-    private readonly RheoSenseInstrumentData _activePit = new(
-        RheoSenseConstants.ActivePitNamespace,
-        RheoSenseConstants.ActivePitNodePrefix);
-    private readonly RheoSenseInstrumentData _flowLine = new(
-        RheoSenseConstants.FlowLineNamespace,
-        RheoSenseConstants.FlowLineNodePrefix);
-    private readonly RheoSenseInstrumentData _activePitStandardDeviation = new(
-        RheoSenseConstants.ActivePitNamespace,
-        RheoSenseConstants.ActivePitStandardDeviationNodePrefix,
-        includeExtrapolationParameters: false);
-    private readonly RheoSenseInstrumentData _flowLineStandardDeviation = new(
-        RheoSenseConstants.FlowLineNamespace,
-        RheoSenseConstants.FlowLineStandardDeviationNodePrefix,
-        includeExtrapolationParameters: false);
-
-    public Worker(
-        ILogger<IDWISWorker<ConfigurationForRheoSense>> logger,
-        ILogger<DWISClientOPCF>? clientLogger)
-        : base(logger, clientLogger)
+    private sealed class SourceRuntime(RheometerInstallation installation, int seed)
     {
+        public RheometerSource Source { get; } = installation.Source;
+        public RheometerInstallation Installation { get; } = installation;
+        public RheoSenseOPCUATagSet Tags { get; } = installation.Tags;
+        public RheoSenseInstrumentData Data { get; } = new(installation.InputNamespace, installation.InputPrefix);
+        public RheoSenseInstrumentData Sigma { get; } = new(installation.InputNamespace, installation.InputPrefix + "Sigma_", false);
+        public RheoSenseStateData States { get; } = new(installation.Source, installation.Tags);
+        public Random Random { get; } = new(seed);
+        public int Index => (int)Source.Placement;
     }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         ConnectToOPCUA();
-        if (Configuration is null || _OPCUAClient is null || !_OPCUAClient.Connected)
+        if (Configuration is null || _OPCUAClient?.Connected != true) return;
+        Configuration.ValidateSources();
+        var sources = Configuration.GetInstallations().Select(installation => new SourceRuntime(installation,
+            installation.HistoryId.Aggregate(Configuration.SimulationSeed, (seed, c) => unchecked(seed * 31 + c)))).ToArray();
+        foreach (var source in sources)
         {
-            Logger?.LogError("Could not connect to the RheoSense OPC-UA endpoint.");
-            return;
+            await RheoSenseUnitConversions.ConfigureAsync(Configuration, source.Tags, cancellationToken: stoppingToken);
+            ConfigureOPCUANodes(source.Data, source.Tags);
+            ConfigureOPCUANodes(source.Sigma, source.Tags, standardDeviation: true);
+            if (source.Installation.ExtrapolationId is null) await RegisterToOPCUA(source.States, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+            await RegisterToOPCUA(source.Data, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+            await RegisterToOPCUA(source.Sigma, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+            FillConditions(source.Data, 0, source.Random, source.Index);
+            FillRheology(source.Data, 0, source.Index);
+            FillStandardDeviations(source.Sigma, source.Index);
+            await PublishOPCUATagSetAsync(source.Data, source.Tags, stoppingToken);
+            await PublishOPCUAStandardDeviationTagSetAsync(source.Sigma, source.Tags, stoppingToken);
         }
-
-        ConfigureOPCUANodes(_activePit, Configuration.ActivePitTags);
-        ConfigureOPCUANodes(_flowLine, Configuration.FlowLineTags);
-        ConfigureOPCUANodes(_activePitStandardDeviation, Configuration.ActivePitTags, standardDeviation: true);
-        ConfigureOPCUANodes(_flowLineStandardDeviation, Configuration.FlowLineTags, standardDeviation: true);
-
-        await RegisterToOPCUA(_activePit, RheoSenseConstants.ActivePitManifest, RheoSenseConstants.Provider);
-        await RegisterToOPCUA(_flowLine, RheoSenseConstants.FlowLineManifest, RheoSenseConstants.Provider);
-        await RegisterToOPCUA(_activePitStandardDeviation, RheoSenseConstants.ActivePitStandardDeviationManifest, RheoSenseConstants.Provider);
-        await RegisterToOPCUA(_flowLineStandardDeviation, RheoSenseConstants.FlowLineStandardDeviationManifest, RheoSenseConstants.Provider);
-
-        Random activePitRandom = new(Configuration.SimulationSeed);
-        Random flowLineRandom = new(unchecked(Configuration.SimulationSeed * 397) ^ 1);
         DateTime started = DateTime.UtcNow;
-        TimeSpan conditionPeriod = Configuration.SimulationConditionGenerationPeriod > TimeSpan.Zero
-            ? Configuration.SimulationConditionGenerationPeriod
-            : TimeSpan.FromSeconds(10);
-        TimeSpan rheologyGenerationPeriod = Configuration.SimulationDataGenerationPeriod > TimeSpan.Zero
-            ? Configuration.SimulationDataGenerationPeriod
-            : TimeSpan.FromMinutes(30);
-        TimeSpan rheologyPublishPeriod = Configuration.SimulationOPCUAPublishPeriod > TimeSpan.Zero
-            ? Configuration.SimulationOPCUAPublishPeriod
-            : TimeSpan.FromMinutes(5);
-        DateTime nextActivePitRheologyGeneration = started + rheologyGenerationPeriod;
-        DateTime nextFlowLineRheologyGeneration = started + rheologyGenerationPeriod;
-        DateTime nextRheologyPublish = started + rheologyPublishPeriod;
-
-        FillConditions(_activePit, 0, activePitRandom, 0);
-        FillConditions(_flowLine, 0, flowLineRandom, 1);
-        FillRheology(_activePit, 0, 0);
-        FillRheology(_flowLine, 0, 1);
-        FillStandardDeviations(_activePitStandardDeviation, 0);
-        FillStandardDeviations(_flowLineStandardDeviation, 1);
-        await PublishCurrentValuesAsync(stoppingToken);
-
-        using PeriodicTimer timer = new(conditionPeriod);
-
+        TimeSpan conditions = Configuration.SimulationConditionGenerationPeriod > TimeSpan.Zero ? Configuration.SimulationConditionGenerationPeriod : TimeSpan.FromSeconds(10);
+        TimeSpan generation = Configuration.SimulationDataGenerationPeriod > TimeSpan.Zero ? Configuration.SimulationDataGenerationPeriod : TimeSpan.FromMinutes(30);
+        TimeSpan publish = Configuration.SimulationOPCUAPublishPeriod > TimeSpan.Zero ? Configuration.SimulationOPCUAPublishPeriod : TimeSpan.FromMinutes(5);
+        DateTime nextGeneration = started + generation, nextPublish = started + publish, nextConditions = started;
+        int heartbeat = 1;
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             DateTime now = DateTime.UtcNow;
-            double elapsed = (now - started).TotalSeconds;
-            FillConditions(_activePit, elapsed, activePitRandom, 0);
-            FillConditions(_flowLine, elapsed, flowLineRandom, 1);
-            FillConditionStandardDeviations(_activePitStandardDeviation, 0);
-            FillConditionStandardDeviations(_flowLineStandardDeviation, 1);
-            await PublishChannelValuesAsync(RheoSenseDataChannel.DensityPressureTemperature, stoppingToken);
-
-            bool rheologyChanged = false;
-            if (now >= nextActivePitRheologyGeneration)
+            heartbeat = heartbeat == 1 ? 2 : 1;
+            foreach (var source in sources.Where(s => s.Installation.ExtrapolationId is null))
             {
-                FillRheology(_activePit, elapsed, 0);
-                nextActivePitRheologyGeneration = AdvanceSchedule(
-                    nextActivePitRheologyGeneration,
-                    rheologyGenerationPeriod,
-                    now);
-                rheologyChanged = true;
+                source.States.RunningHeartbeat = Scalar(heartbeat);
+                source.States.Automatic = Scalar(1);
+                source.States.Gel10SecondsActive = Scalar(0);
+                source.States.Gel10MinutesActive = Scalar(0);
+                source.States.OperatingHours = Scalar((now - started).TotalHours);
+                // OperationTime encoding is unspecified by IMS; do not simulate an invented value.
+                await PublishOPCUAAsync(source.States, null, null, null, stoppingToken);
             }
-
-            if (now >= nextFlowLineRheologyGeneration)
+            if (now < nextConditions) continue;
+            nextConditions = AdvanceSchedule(nextConditions, conditions, now);
+            bool generate = now >= nextGeneration;
+            bool publishRheology = generate || now >= nextPublish;
+            foreach (var source in sources)
             {
-                FillRheology(_flowLine, elapsed, 1);
-                nextFlowLineRheologyGeneration = AdvanceSchedule(
-                    nextFlowLineRheologyGeneration,
-                    rheologyGenerationPeriod,
-                    now);
-                rheologyChanged = true;
+                FillConditions(source.Data, (now - started).TotalSeconds, source.Random, source.Index);
+                FillConditionStandardDeviations(source.Sigma, source.Index);
+                await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, stoppingToken);
+                await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, stoppingToken);
+                if (generate) FillRheology(source.Data, (now - started).TotalSeconds, source.Index);
+                if (publishRheology)
+                {
+                    await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.Rheology, stoppingToken);
+                    await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.Rheology, stoppingToken);
+                }
             }
-
-            if (rheologyChanged || now >= nextRheologyPublish)
-            {
-                await PublishChannelValuesAsync(RheoSenseDataChannel.Rheology, stoppingToken);
-                nextRheologyPublish = AdvanceSchedule(nextRheologyPublish, rheologyPublishPeriod, now);
-            }
-
-            Logger?.LogInformation(
-                "Published RheoSense condition values: active pit={ActivePitPressure:F0} Pa, return flow={FlowLinePressure:F0} Pa",
-                _activePit.MeasuredPressure?.ScalarValue,
-                _flowLine.MeasuredPressure?.ScalarValue);
-            ConfigurationUpdater<ConfigurationForRheoSense>.Instance.UpdateConfiguration(this);
+            if (generate) nextGeneration = AdvanceSchedule(nextGeneration, generation, now);
+            if (publishRheology) nextPublish = AdvanceSchedule(nextPublish, publish, now);
         }
     }
-
-    private async Task PublishCurrentValuesAsync(CancellationToken stoppingToken)
-    {
-        await PublishOPCUATagSetAsync(_activePit, Configuration!.ActivePitTags, stoppingToken);
-        await PublishOPCUATagSetAsync(_flowLine, Configuration.FlowLineTags, stoppingToken);
-        await PublishOPCUAStandardDeviationTagSetAsync(_activePitStandardDeviation, Configuration.ActivePitTags, stoppingToken);
-        await PublishOPCUAStandardDeviationTagSetAsync(_flowLineStandardDeviation, Configuration.FlowLineTags, stoppingToken);
-    }
-
-    private async Task PublishChannelValuesAsync(
-        RheoSenseDataChannel channel,
-        CancellationToken stoppingToken)
-    {
-        await PublishOPCUATagSetChannelAsync(_activePit, Configuration!.ActivePitTags, channel, stoppingToken);
-        await PublishOPCUATagSetChannelAsync(_flowLine, Configuration.FlowLineTags, channel, stoppingToken);
-        await PublishOPCUAStandardDeviationTagSetChannelAsync(
-            _activePitStandardDeviation,
-            Configuration.ActivePitTags,
-            channel,
-            stoppingToken);
-        await PublishOPCUAStandardDeviationTagSetChannelAsync(
-            _flowLineStandardDeviation,
-            Configuration.FlowLineTags,
-            channel,
-            stoppingToken);
-    }
-
     private static DateTime AdvanceSchedule(DateTime next, TimeSpan period, DateTime now)
     {
         do
@@ -203,6 +138,10 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
         data.YPLConsistencyIndexAtMeasuredTemperatureAndPressure = Scalar(consistency);
         data.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure = Scalar(behavior);
 
+        data.GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure = Scalar(3.5 + sensorIndex * .2);
+        data.GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure = Scalar(5.0 + sensorIndex * .3);
+        data.GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure = Scalar(3.0 + sensorIndex * .2);
+        data.GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure = Scalar(4.3 + sensorIndex * .3);
         data.ExtrapolatedTemperature = Scalar(333.15);
         data.ExtrapolatedPressure = Scalar(5.0e6);
         SetExtrapolatedShearStresses(data, yieldStress * 0.92, consistency * 0.88, behavior);

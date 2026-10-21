@@ -7,9 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.5-build.494" />
-    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.5-build.498" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion" Version="3.4.5" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion.DrillingEngineering" Version="3.4.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.6" />
+    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.6" />
     <PackageReference Include="YPLCalibrationFromRheometer.Model" Version="1.0.0" />
+    <PackageReference Include="DWIS.Client.ReferenceImplementation.OPCFoundation" Version="2.2.52" />
+    <PackageReference Include="DWIS.Vocabulary.Schemas" Version="1.0.175" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.DrillingProperties" Version="10.2.10" />
   </ItemGroup>
 
 </Project>

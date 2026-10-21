@@ -22,4 +22,8 @@ public interface IRheoSenseOutputData
     GaussianProperty? YPLYieldStressAtExtrapolatedTemperatureAndPressure { get; set; }
     GaussianProperty? YPLConsistencyIndexAtExtrapolatedTemperatureAndPressure { get; set; }
     GaussianProperty? YPLFlowBehaviorIndexAtExtrapolatedTemperatureAndPressure { get; set; }
+    GaussianProperty? GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure { get; set; }
+    GaussianProperty? GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure { get; set; }
+    GaussianProperty? GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure { get; set; }
+    GaussianProperty? GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure { get; set; }
 }

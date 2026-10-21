@@ -79,6 +79,10 @@ public static class RheoSenseBridgeMapper
             input.YieldPointAtMeasuredTemperatureAndPressure,
             standardDeviations?.YieldPointAtMeasuredTemperatureAndPressure);
 
+        output.GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure = Gaussian(input.GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure, standardDeviations?.GelStrengthAfter10SecondsAtMeasuredTemperatureAndPressure);
+        output.GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure = Gaussian(input.GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure, standardDeviations?.GelStrengthAfter10MinutesAtMeasuredTemperatureAndPressure);
+        output.GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure = Gaussian(input.GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure, standardDeviations?.GelStrengthAfter10SecondsAtExtrapolatedTemperatureAndPressure);
+        output.GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure = Gaussian(input.GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure, standardDeviations?.GelStrengthAfter10MinutesAtExtrapolatedTemperatureAndPressure);
         RheologyMapping measured = FitAndGenerateCouetteCurve(MeasuredShearStresses(input));
         output.FlowCurveAtMeasuredTemperatureAndPressure = measured.FlowCurve;
         output.YPLYieldStressAtMeasuredTemperatureAndPressure = Gaussian(measured.Model?.Tau0);

@@ -28,7 +28,8 @@ public sealed class RheoSenseDataLogWriter
         ActivePitRawPrefix,
         ActivePitPublishedPrefix,
         FlowLineRawPrefix,
-        FlowLinePublishedPrefix
+        FlowLinePublishedPrefix,
+        "rheosense-source"
     };
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -40,12 +41,12 @@ public sealed class RheoSenseDataLogWriter
         .Where(property => property.PropertyType == typeof(ScalarDrillingProperty))
         .OrderBy(property => property.MetadataToken)
         .ToArray();
-    private static readonly PropertyInfo[] PublishedSignalProperties = typeof(ActivePitOutputData)
+    private static readonly PropertyInfo[] PublishedSignalProperties = typeof(RheometerOutputData)
         .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
         .Where(property => property.PropertyType == typeof(GaussianProperty) || property.PropertyType == typeof(ScalarProperty))
         .OrderBy(property => property.MetadataToken)
         .ToArray();
-    private static readonly PropertyInfo[] PublishedCurveProperties = typeof(ActivePitOutputData)
+    private static readonly PropertyInfo[] PublishedCurveProperties = typeof(RheometerOutputData)
         .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
         .Where(property => property.PropertyType == typeof(FlowCurve))
         .OrderBy(property => property.MetadataToken)
@@ -175,6 +176,22 @@ public sealed class RheoSenseDataLogWriter
             timestampUtc,
             entry);
     }
+
+    // Additional installations use source-scoped v2 streams; legacy two-slot records remain unchanged.
+    public Task AppendRawSensorAsync(DateTimeOffset time, string source, RheoSenseInstrumentData values, RheoSenseInstrumentData sigmas, RheoSenseDataChannel? channel = null) =>
+        source is "ActivePit" or "FlowLine" ? AppendRawSensorAsync(time, Enum.Parse<RheoSenseSensorPosition>(source), values, sigmas, channel) :
+        AppendSerializedAsync("rheosense-source-" + source + "-raw", time, CreateRawSensorEntry(time, source, values, sigmas, channel));
+    public Task AppendPublishedSensorAsync(DateTimeOffset time, string source, IRheoSenseOutputData data, RheoSenseDataChannel? channel = null) =>
+        source is "ActivePit" or "FlowLine" ? AppendPublishedSensorAsync(time, Enum.Parse<RheoSenseSensorPosition>(source), data, channel) :
+        AppendSerializedAsync("rheosense-source-" + source + "-published", time, CreatePublishedSensorEntry(time, source, data, channel));
+    public static RheoSenseCompactLogEntry CreateRawSensorEntry(DateTimeOffset time, string source, RheoSenseInstrumentData values, RheoSenseInstrumentData sigmas, RheoSenseDataChannel? channel = null) =>
+        source is "ActivePit" or "FlowLine" ? CreateRawSensorEntry(time, Enum.Parse<RheoSenseSensorPosition>(source), values, sigmas, channel) :
+        SerializeEntry(new { kind = "schema", schema = "rheosense.source.raw.v2", units = "SI", fields = RawProperties.Select(p => p.Name) },
+            new { t = time.ToUniversalTime(), source, channel = channel?.ToString(), values = ExtractRawValues(values, channel), sigmas = ExtractRawValues(sigmas, channel) });
+    public static RheoSenseCompactLogEntry CreatePublishedSensorEntry(DateTimeOffset time, string source, IRheoSenseOutputData data, RheoSenseDataChannel? channel = null) =>
+        source is "ActivePit" or "FlowLine" ? CreatePublishedSensorEntry(time, Enum.Parse<RheoSenseSensorPosition>(source), data, channel) :
+        SerializeEntry(new { kind = "schema", schema = "rheosense.source.published.v2", units = "SI", fields = PublishedFields, curveFields = FlowCurveFields, curves = PublishedCurveProperties.Select(p => p.Name) },
+            new { t = time.ToUniversalTime(), source, channel = channel?.ToString(), values = ExtractPublishedSignals(data, channel), curves = channel == RheoSenseDataChannel.DensityPressureTemperature ? Array.Empty<double?[][]>() : ExtractCurves(data) });
 
     public static RheoSenseCompactLogEntry CreateRawSensorEntry(
         DateTimeOffset timestampUtc,

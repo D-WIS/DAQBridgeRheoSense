@@ -35,6 +35,22 @@ public static class RheoSenseBlackboardHistory
         return $"{NodePrefix}.{sensorName}.{kind}.History.{slot}";
     }
 
+    public static string GetNodeId(string source, RheoSenseHistoryDataKind kind, int slot)
+    {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(source, "^[A-Za-z][A-Za-z0-9_]{0,63}\\z")) throw new ArgumentException("Invalid source identity.");
+        ArgumentOutOfRangeException.ThrowIfNegative(slot);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(slot, BucketCount);
+        return $"{NodePrefix}.{source}.{kind}.History.{slot}";
+    }
+    public static ManifestFile CreateManifest(IEnumerable<string> sources)
+    {
+        var manifest = CreateManifest();
+        manifest.ProvidedVariables = (from source in sources.Distinct(StringComparer.Ordinal)
+            from kind in Enum.GetValues<RheoSenseHistoryDataKind>() from slot in Enumerable.Range(0, BucketCount)
+            select new ProvidedVariable { DataType = "string", VariableID = GetNodeId(source, kind, slot) }).ToList();
+        return manifest;
+    }
+
     public static DateTimeOffset GetBucketStart(DateTimeOffset timestampUtc)
     {
         long ticks = BucketDuration.Ticks;

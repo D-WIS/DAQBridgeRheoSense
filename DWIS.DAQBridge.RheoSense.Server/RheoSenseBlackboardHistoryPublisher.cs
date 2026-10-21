@@ -9,10 +9,10 @@ internal sealed class RheoSenseBlackboardHistoryPublisher
     private readonly Dictionary<string, string?> _payloads = new(StringComparer.Ordinal);
     private IOPCUADWISClient? _client;
 
-    public void Initialize(IOPCUADWISClient client)
+    public void Initialize(IOPCUADWISClient client, IEnumerable<string> sources)
     {
         ArgumentNullException.ThrowIfNull(client);
-        ManifestInjectionResult? result = client.Inject(RheoSenseBlackboardHistory.CreateManifest());
+        ManifestInjectionResult? result = client.Inject(RheoSenseBlackboardHistory.CreateManifest(sources));
         if (result?.Success != true || result.ProvidedVariables is null)
         {
             throw new InvalidOperationException("The RheoSense Blackboard history variables could not be registered.");
@@ -36,7 +36,7 @@ internal sealed class RheoSenseBlackboardHistoryPublisher
     }
 
     public void Append(
-        RheoSenseSensorPosition sensor,
+        string sensor,
         RheoSenseHistoryDataKind kind,
         DateTimeOffset timestampUtc,
         RheoSenseCompactLogEntry entry)
