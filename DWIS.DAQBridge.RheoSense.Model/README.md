@@ -28,6 +28,12 @@ standard-deviation tags.
 `FlowLineOutputData` are legacy identity adapters. Configured instances use their
 own semantic identities and the shared `FlowCurve` type.
 
+Serialized flow curves implement the shared, vendor-neutral `Rheometry/v1`
+contract. `RheometryContract` supplies the canonical SchemaURL and MetaDataURL
+placed on every `JSonDataType` flow-curve description. Curve coordinates use
+distribution-bearing properties, and rotational speed is published as SI
+angular velocity in `rad/s`.
+
 The raw OPC-UA names containing `Extraplated` retain the instrument spelling.
 Public semantic properties use the corrected `Extrapolated` spelling.
 
@@ -55,6 +61,10 @@ mapper publishes neither fitted parameters nor generated curve samples.
 maps. Every entry contains its own complete namespace and node ID. Missing
 entries or fields receive sensor-specific defaults when configuration is loaded.
 
+`ContractsPublicBaseUrl` selects the externally reachable shared-contract host
+used in flow-curve semantic manifests. It defaults to
+`https://dwis.digiwells.no/` and must be an absolute HTTP or HTTPS URL.
+
 Canonical model and wire values are SI. Optional `UnitConversions` and
 `StandardDeviationUnitConversions` convert instrument values into SI before
 publication.
@@ -69,9 +79,9 @@ The model's behavior is exercised by `DWIS.DAQBridge.RheoSense.Tests`.
 
 ## DWIS dependency and semantic update
 
-The bridge now uses Common Worker/Model 1.0.6, OPC Foundation client 2.2.52,
-DWIS vocabulary 1.0.175 and OSDC semantic-property framework 10.2.10 (latest stable
-versions verified from NuGet on 20 October 2026). Existing signal identities and
+The bridge now uses Common Worker/Model 1.0.7, OPC Foundation client 2.2.53,
+DWIS vocabulary 1.0.176 and OSDC semantic-property framework 10.2.11 (latest stable
+versions verified from NuGet on 22 October 2026). Existing signal identities and
 persistent paths are retained. Instrument device nodes reference an InstrumentModel
 with ModelName and confirmed ModelIdentifier fields, using the same mechanism as BaseStar.
 

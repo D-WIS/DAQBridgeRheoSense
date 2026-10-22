@@ -11,6 +11,8 @@ project is not packaged or deployed.
 - Active-pit and return-flow semantic identity separation.
 - Mullineux YPL fitting and Zamora/Kelessidis fallback.
 - Physical and simulated Fann 35 curve generation and serialization.
+- Conformance of flow-curve distributions, SI angular velocity, and semantic
+  SchemaURL/MetaDataURL fields to the shared `Rheometry/v1` contract.
 - Independent condition and rheology change detection.
 - Missing and zero standard-deviation handling.
 - Compact logging, UTC normalization, compression, retention, and sensor

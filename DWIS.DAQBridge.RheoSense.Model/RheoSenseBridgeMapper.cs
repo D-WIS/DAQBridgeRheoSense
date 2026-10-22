@@ -163,7 +163,8 @@ public static class RheoSenseBridgeMapper
 
             measurements.Add(new FlowCurveMeasurement
             {
-                ConcentricCylindersRotationalSpeed = new DiracDistribution(rotationalSpeed),
+                // The shared Rheometry/v1 contract uses the SI angular-velocity unit (rad/s).
+                ConcentricCylindersRotationalSpeed = new DiracDistribution(omega),
                 ConcentricCylindersShearRateNewtonianHypothesis = new GaussianDistribution(newtonianShearRate, 0.0),
                 ConcentricCylindersShearRateNonNewtonianHypothesis = new GaussianDistribution(correctedShearRate, 0.0),
                 ConcentricCylindersTorque = new GaussianDistribution(couetteMeasurement.Torque, 0.0),

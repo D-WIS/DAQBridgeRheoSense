@@ -9,6 +9,7 @@
   "MaximumDataLogStorageBytes": 1073741824,
   "WebAppTimeSpanHours": 6,
   "GeneralBlackboard": "opc.tcp://localhost:48030",
+  "ContractsPublicBaseUrl": "https://dwis.digiwells.no/",
   "InitializeOPCUAVariables": true,
   "SimulationSeed": 20261016,
   "SimulationConditionGenerationPeriod": "00:00:10",

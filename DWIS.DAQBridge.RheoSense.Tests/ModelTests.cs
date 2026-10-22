@@ -115,7 +115,7 @@ public class ModelTests
         Assert.Equal(measuredConsistency, output.YPLConsistencyIndexAtMeasuredTemperatureAndPressure!.Mean!.Value, 5);
         Assert.Equal(measuredBehavior, output.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure!.Mean!.Value, 5);
         Assert.Equal(
-            3.0 / 60.0,
+            3.0 / 60.0 * 2.0 * Math.PI,
             Assert.IsType<OSDC.DotnetLibraries.General.Statistics.DiracDistribution>(
                 output.FlowCurveAtMeasuredTemperatureAndPressure?.Measurements?[0].ConcentricCylindersRotationalSpeed).Value);
         FlowCurveMeasurement first = output.FlowCurveAtMeasuredTemperatureAndPressure!.Measurements![0];
@@ -199,7 +199,7 @@ public class ModelTests
         List<FlowCurveMeasurement>? decoded = JsonSerializer.Deserialize<List<FlowCurveMeasurement>>(json);
 
         Assert.Equal(10, decoded?.Count);
-        Assert.Equal(3.0 / 60.0, decoded![0].ConcentricCylindersRotationalSpeed!.Value);
+        Assert.Equal(3.0 / 60.0 * 2.0 * Math.PI, decoded![0].ConcentricCylindersRotationalSpeed!.Value);
         Assert.NotNull(decoded[0].ConcentricCylindersShearStressNonNewtonianHypothesis?.Mean);
     }
 

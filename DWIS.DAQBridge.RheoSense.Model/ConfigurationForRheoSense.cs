@@ -7,6 +7,7 @@ public class ConfigurationForRheoSense : ConfigurationForOPCUA
 {
     public TimeSpan HeartbeatTimeout { get; set; } = TimeSpan.FromSeconds(10);
     public string? UnitConversionServiceUrl { get; set; }
+    public string ContractsPublicBaseUrl { get; set; } = RheometryContract.DefaultPublicBaseUrl;
     public List<RheometerSource>? Sources { get; set; }
     public IReadOnlyList<RheometerSource> GetSources() => RheometerSource.ValidateAll(Sources ?? RheometerSource.Defaults());
 
@@ -49,6 +50,7 @@ public class ConfigurationForRheoSense : ConfigurationForOPCUA
     public void ValidateSources()
     {
         if (HeartbeatTimeout <= TimeSpan.Zero) throw new InvalidOperationException("HeartbeatTimeout must be positive.");
+        RheometryContract.ResolveUrls(ContractsPublicBaseUrl);
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         foreach (var installation in GetInstallations())
         {

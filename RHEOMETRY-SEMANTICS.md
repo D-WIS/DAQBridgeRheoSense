@@ -2,13 +2,23 @@
 
 This contract is published by the runtime output manifests of RheoSense and
 BaraLogix and consumed by DAQDisplay. It adds no DWIS vocabulary classes,
-predicates or fields. It uses vocabulary 1.0.175. The controlled string namespace
+predicates or fields. It uses vocabulary 1.0.176. The controlled string namespace
 `https://digiwells.no/daq/rheometry/1/` identifies this application profile; it is
 not a claim that these identifiers are official DWIS vocabulary or a web service.
 
 ## Graph and serialization
 
-The existing JSON payload and signal identities are unchanged. A combined
+Signal identities are unchanged. Flow-curve JSON uses the common
+`Rheometry/v1` wire contract owned and published by the shared contracts projects
+in the `Common` repository at
+`https://dwis.digiwells.no/Rheometry/v1/`. Every flow-curve `JSonDataType`
+description carries that contract's SchemaURL and MetaDataURL. The payload is an
+array of distribution-bearing points: angular velocity is a Dirac distribution;
+shear rates, torque, and shear stresses are Gaussian distributions whose standard
+deviation may be null when unavailable. Canonical units are SI (`rad/s`, `1/s`,
+`N.m`, and `Pa`).
+
+A combined
 `FlowCurve` is `ComputedData`, not a direct measurement: it contains different
 representations. It `IsDependentOn` two separately identified `FlowCurve` nodes.
 Each representation publishes `IsComputedBy`, a rheological hypothesis, independent
@@ -32,7 +42,7 @@ position; discovery matches the exact token values, never their node names.
 | `compatibility` | `InstrumentNative`, `NoCompatibilityConversion`, `Fann35Equivalent` |
 | `purpose` | `NativeRheologyFit`, `Fann35Compatibility`, `NativeRheometerConversion`, `NonNewtonianCorrection` |
 | `compatibilityTarget` | `Fann35-R1B1` |
-| `shearRateMember`, `shearStressMember`, `jsonMember` | Exact member names in each JSON array entry; no unit conversion is implied |
+| `shearRateMember`, `shearStressMember`, `jsonMember` | Exact member names in each `Rheometry/v1` JSON array entry; values use the canonical units declared by its metadata document |
 | `availability` | `NotPopulated` means the bridge does not populate that component |
 
 Multiple different values for one axis are ambiguous. Consumers leave it

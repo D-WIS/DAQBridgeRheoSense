@@ -8,14 +8,18 @@ namespace DWIS.DAQBridge.RheoSense.Server;
 public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 {
     private readonly List<SourceRuntime> sources = new();
-    private sealed class SourceRuntime(RheometerInstallation installation)
+    private sealed class SourceRuntime(RheometerInstallation installation, string contractsPublicBaseUrl)
     {
         public RheometerSource Source { get; } = installation.Source;
         public RheometerInstallation Installation { get; } = installation;
         public RheoSenseOPCUATagSet Tags { get; } = installation.Tags;
         public RheoSenseInstrumentData Input { get; } = new(installation.InputNamespace, installation.InputPrefix);
         public RheoSenseInstrumentData Sigma { get; } = new(installation.InputNamespace, installation.InputPrefix + "Sigma_", false);
-        public RheometerOutputData Output { get; } = installation.ExtrapolationId is null ? new RheometerOutputData(installation.Source, installation.Tags.DisabledBinghamOutputs()) : new RheometerExtrapolationOutput(installation.Source, installation.ExtrapolationId);
+        public RheometerOutputData Output { get; } = RheometryContract.ApplyPublicBaseUrl(
+            installation.ExtrapolationId is null
+                ? new RheometerOutputData(installation.Source, installation.Tags.DisabledBinghamOutputs())
+                : new RheometerExtrapolationOutput(installation.Source, installation.ExtrapolationId),
+            contractsPublicBaseUrl);
         public SensorProcessingState State { get; } = new();
         public RheoSenseStateData States { get; } = new(installation.Source, installation.Tags);
         public bool Inactive { get; set; }
@@ -168,7 +172,7 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
         heartbeats.Clear();
         foreach (var installation in Configuration!.GetInstallations())
         {
-            var runtime = new SourceRuntime(installation);
+            var runtime = new SourceRuntime(installation, Configuration.ContractsPublicBaseUrl);
             await RheoSenseUnitConversions.ConfigureAsync(Configuration, runtime.Tags);
             ConfigureOPCUANodes(runtime.Input, runtime.Tags);
             ConfigureOPCUANodes(runtime.Sigma, runtime.Tags, standardDeviation: true);

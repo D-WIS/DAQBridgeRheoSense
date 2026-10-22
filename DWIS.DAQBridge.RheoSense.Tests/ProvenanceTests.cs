@@ -9,6 +9,22 @@ namespace DWIS.DAQBridge.RheoSense.Tests;
 public class ProvenanceTests
 {
     [Fact]
+    public void ContractDocumentHostCanBeConfiguredForPublishedManifests()
+    {
+        var data = RheometryContract.ApplyPublicBaseUrl(new ActivePitOutputData(), "https://contracts.example/base/");
+        Field[] fields = data.Manifests.Value
+            .Where(pair => pair.Key.Name.StartsWith("FlowCurveAt"))
+            .SelectMany(pair => pair.Value.InjectedNodes)
+            .SelectMany(node => node.Fields ?? Array.Empty<Field>())
+            .ToArray();
+
+        Assert.Contains(fields, field => field.FieldName == Attributes.JSonDataType_SchemaURL
+            && field.FieldValue == "https://contracts.example/base/Rheometry/v1/schema.json");
+        Assert.Contains(fields, field => field.FieldName == Attributes.JSonDataType_MetaDataURL
+            && field.FieldValue == "https://contracts.example/base/Rheometry/v1/metadata.json");
+    }
+
+    [Fact]
     public void RuntimeManifestsUseRegisteredDwisTypesAndKeepBothCurveRepresentations()
     {
         foreach (DWISData data in new DWISData[] { new ActivePitOutputData(), new FlowLineOutputData() })
@@ -31,6 +47,11 @@ public class ProvenanceTests
             Assert.Contains(descriptions, d => d.EndsWith("/nonNewtonianTreatment/ModelConsistent"));
             Assert.Equal(6, descriptions.Count(d => d.Contains("/jsonMember/")));
             var curve = manifest.InjectedNodes.First(n => n.TypeDictionaryURI == "ComputedData" && n.UniqueName.Contains("FlowCurveAt"));
+            var fields = manifest.InjectedNodes.SelectMany(node => node.Fields ?? Array.Empty<Field>()).ToArray();
+            Assert.Contains(fields, field =>
+                field.FieldName == Attributes.JSonDataType_SchemaURL && field.FieldValue == RheometryContract.SchemaUrl);
+            Assert.Contains(fields, field =>
+                field.FieldName == Attributes.JSonDataType_MetaDataURL && field.FieldValue == RheometryContract.MetaDataUrl);
             Assert.DoesNotContain(manifest.InjectedNodes, n => n.UniqueName == curve.UniqueName && n.TypeDictionaryURI == "DirectMeasurement");
             Assert.DoesNotContain(manifest.InjectedNodes.SelectMany(n => n.Fields ?? Array.Empty<Field>()), f => f.FieldName == "Value");
         }

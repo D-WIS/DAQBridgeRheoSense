@@ -40,6 +40,13 @@ RheoSense supplies no flow-curve object over OPC-UA. The curves are bridge
 outputs constructed from the ten shear-stress values at 3, 6, 10, 20, 30, 60,
 100, 200, 300, and 600 RPM.
 
+Flow-curve JSON follows the vendor-neutral `Rheometry/v1` contract shared with
+BaraLogix and future online rheometers. The contract uses a Dirac distribution
+for angular velocity and Gaussian distributions for shear rates, torque, and
+shear stresses. Runtime manifests publish its canonical schema and metadata
+URLs at `https://dwis.digiwells.no/Rheometry/v1/`. Angular velocity is serialized
+in SI `rad/s`; other curve values use `1/s`, `N.m`, and `Pa` as applicable.
+
 ## Shared configuration
 
 The worker applications and WebApp use the untracked runtime file
@@ -52,6 +59,8 @@ include:
 - `OPCUAURL`: RheoSense OPC-UA endpoint, default
   `opc.tcp://localhost:48030`.
 - `GeneralBlackboard`: D-WIS Blackboard OPC-UA endpoint.
+- `ContractsPublicBaseUrl`: public base URL of the shared schema and metadata
+  service, default `https://dwis.digiwells.no/`.
 - `ActivePitTags` and `FlowLineTags`: independent per-signal namespace, complete
   node ID, and optional unit-conversion maps.
 - `OPCUALoopDuration` and `ConnectionRetryInterval`: polling and recovery
@@ -236,9 +245,9 @@ Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
 
 ## DWIS dependency and semantic update
 
-The bridge now uses Common Worker/Model 1.0.6, OPC Foundation client 2.2.52,
-DWIS vocabulary 1.0.175 and OSDC semantic-property framework 10.2.10 (latest stable
-versions verified from NuGet on 20 October 2026). Existing signal identities and
+The bridge now uses Common Worker/Model 1.0.7, OPC Foundation client 2.2.53,
+DWIS vocabulary 1.0.176 and OSDC semantic-property framework 10.2.11 (latest stable
+versions verified from NuGet on 22 October 2026). Existing signal identities and
 persistent paths are retained. Instrument device nodes reference an InstrumentModel
 with ModelName and confirmed ModelIdentifier fields, using the same mechanism as BaseStar.
 

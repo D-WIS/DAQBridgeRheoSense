@@ -35,6 +35,8 @@ Important settings include:
 - `OPCUAURL`: RheoSense OPC-UA endpoint; default
   `opc.tcp://localhost:48030`.
 - `GeneralBlackboard`: D-WIS Blackboard OPC-UA endpoint.
+- `ContractsPublicBaseUrl`: public base URL used in the published `SchemaURL` and
+  `MetaDataURL` fields; defaults to `https://dwis.digiwells.no/`.
 - `ConnectionRetryInterval`: delay between connection attempts.
 - `OPCUALoopDuration`: OPC-UA polling period.
 - `InitializeOPCUAVariables`: register configured input nodes when enabled.
