@@ -232,10 +232,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [Mandatory(CommonProperty.MandatoryType.General)]
         [SemanticStringVariable("RheoSenseAtActivePitFlowCurveAtMeasuredTP")]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP", Nouns.Enum.DynamicDrillingSignal)]
-        [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Nouns.Enum.ComputedData)]
+        // The Blackboard resolves fields against the primary manifest type.
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Nouns.Enum.JSonDataType,
             Attributes.JSonDataType_SchemaURL, RheometryContract.SchemaUrl,
             Attributes.JSonDataType_MetaDataURL, RheometryContract.MetaDataUrl)]
+        [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Nouns.Enum.ComputedData)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Nouns.Enum.FlowCurve)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtMeasuredTP#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitFlowCurveAtMeasuredTP")]
         [SemanticFact("topSideTelemetry", Nouns.Enum.TopSideTelemetry)]
@@ -637,10 +638,11 @@ namespace DWIS.DAQBridge.RheoSense.Model
         [Mandatory(CommonProperty.MandatoryType.General)]
         [SemanticStringVariable("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP")]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP", Nouns.Enum.DynamicDrillingSignal)]
-        [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Nouns.Enum.ComputedData)]
+        // The Blackboard resolves fields against the primary manifest type.
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Nouns.Enum.JSonDataType,
             Attributes.JSonDataType_SchemaURL, RheometryContract.SchemaUrl,
             Attributes.JSonDataType_MetaDataURL, RheometryContract.MetaDataUrl)]
+        [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Nouns.Enum.ComputedData)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Nouns.Enum.FlowCurve)]
         [SemanticFact("RheoSenseAtActivePitFlowCurveAtExtrapolatedTP#01", Verbs.Enum.HasDynamicValue, "RheoSenseAtActivePitFlowCurveAtExtrapolatedTP")]
         [SemanticFact("topSideTelemetry", Nouns.Enum.TopSideTelemetry)]

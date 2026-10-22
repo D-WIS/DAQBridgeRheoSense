@@ -2,6 +2,8 @@
   "OPCUAURL": "opc.tcp://localhost:48030",
   "OPCUALoopDuration": "00:00:01",
   "LoopDuration": "00:00:01",
+  "InputSubscriptionInterval": "00:00:00.500",
+  "SubscriptionWatchdogInterval": "00:00:01",
   "ConnectionRetryInterval": "00:00:05",
   "EnableDataLogging": true,
   "DataLogDirectory": "/home",

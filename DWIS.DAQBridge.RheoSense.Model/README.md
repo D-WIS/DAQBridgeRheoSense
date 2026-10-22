@@ -139,3 +139,22 @@ Set the public scheme, host, port and optional path prefix through the existing 
 Merge this setting into the existing configuration; keep the instrument and Blackboard settings. It publishes `http://contracts.example:54321/Rheometry/v1/schema.json` and `http://contracts.example:54321/Rheometry/v1/metadata.json`. An HTTPS URL, IPv6 host, non-default port and path prefix are supported. The default remains `https://dwis.digiwells.no/`. Query strings, fragments, credentials, relative URLs and non-HTTP schemes are rejected.
 
 This setting selects the URLs advertised to consumers; configure the shared contract service to listen on that port and make it reachable from consumers separately. Restart the bridge after changing the configuration.
+
+
+Flow-curve manifests use `JSonDataType` as their primary node type so the
+Blackboard accepts its `SchemaURL` and `MetaDataURL` fields. `ComputedData` and
+`FlowCurve` remain additional semantic classifications. The injector validates
+fields against the primary type; merely including a secondary JSON classification
+does not publish these fields. Restart the updated bridge to reinject its existing
+identities; no Blackboard database or configuration volume reset is needed.
+
+`RheoSenseInputSubscriptions` coalesces node notifications and hands them to the
+worker without mutating input models on OPC-UA callback threads. The observation
+helpers preserve configured SI conversions, constants, disabled tags and separate
+uncertainties. `SubscriptionWatchdogInterval` defaults to one second for cached
+heartbeat expiry; it does not poll measurements.
+
+`InputSubscriptionInterval` sets both OPC-UA sampling and publishing cadence
+(default 500 ms); it must be positive and shorter than `HeartbeatTimeout`. Choose
+an interval shorter than the PLC heartbeat dwell time so alternating states are
+observed. The server requires OPC Foundation client 2.2.54 for this setting.

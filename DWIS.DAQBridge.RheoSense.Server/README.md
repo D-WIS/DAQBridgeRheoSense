@@ -15,8 +15,10 @@ Each sensor has two independently tracked refresh channels:
 - Density, pressure, and temperature.
 - Rheology, extrapolation parameters, YPL values, and shear stresses.
 
-The endpoint may be polled frequently, but a channel is mapped, logged, and
-published only when one of its values or available standard deviations changes.
+The worker uses the DWIS client Subscribe callback for enabled values, uncertainties,
+and state tags. Callbacks queue the latest value per node; the worker coalesces
+50 ms bursts, applies unit conversions and maps/logs/publishes only changed channels.
+A shared transport node is subscribed once. Cached values are not reread each cycle.
 A change from one sensor does not trigger work for the other sensor.
 
 Rheology mapping fits the numerical pipe-rheometer curve and publishes both the
@@ -38,7 +40,10 @@ Important settings include:
 - `ContractsPublicBaseUrl`: public base URL used in the published `SchemaURL` and
   `MetaDataURL` fields; defaults to `https://dwis.digiwells.no/`.
 - `ConnectionRetryInterval`: delay between connection attempts.
-- `OPCUALoopDuration`: OPC-UA polling period.
+- `SubscriptionWatchdogInterval`: cached heartbeat/connection check interval, default
+  one second; must be positive and no longer than `HeartbeatTimeout`.
+- `OPCUALoopDuration`: retained for other executables; the production server does
+  not poll instrument tags at this interval.
 - `InitializeOPCUAVariables`: register configured input nodes when enabled.
 - `ActivePitTags` and `FlowLineTags`: per-signal namespace, complete node ID,
   and optional unit conversions.
@@ -120,3 +125,22 @@ Set the public scheme, host, port and optional path prefix through the existing 
 Merge this setting into the existing configuration; keep the instrument and Blackboard settings. It publishes `http://contracts.example:54321/Rheometry/v1/schema.json` and `http://contracts.example:54321/Rheometry/v1/metadata.json`. An HTTPS URL, IPv6 host, non-default port and path prefix are supported. The default remains `https://dwis.digiwells.no/`. Query strings, fragments, credentials, relative URLs and non-HTTP schemes are rejected.
 
 This setting selects the URLs advertised to consumers; configure the shared contract service to listen on that port and make it reachable from consumers separately. Restart the bridge after changing the configuration.
+
+
+Flow-curve manifests use `JSonDataType` as their primary node type so the
+Blackboard accepts its `SchemaURL` and `MetaDataURL` fields. `ComputedData` and
+`FlowCurve` remain additional semantic classifications. The injector validates
+fields against the primary type; merely including a secondary JSON classification
+does not publish these fields. Restart the updated bridge to reinject its existing
+identities; no Blackboard database or configuration volume reset is needed.
+
+The watchdog expires a stationary heartbeat even when notifications stop.
+Reconnection establishes new subscription bindings; callbacks from a completed
+bridge session are ignored. Notification handling never performs fitting, file IO,
+or Blackboard writes on the client callback thread. Initial values come from the
+client subscription API. Restart after changing tag addresses or conversions.
+
+`InputSubscriptionInterval` sets both OPC-UA sampling and publishing cadence
+(default 500 ms); it must be positive and shorter than `HeartbeatTimeout`. Choose
+an interval shorter than the PLC heartbeat dwell time so alternating states are
+observed. The server requires OPC Foundation client 2.2.54 for this setting.

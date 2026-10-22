@@ -6,6 +6,8 @@ namespace DWIS.DAQBridge.RheoSense.Model;
 public class ConfigurationForRheoSense : ConfigurationForOPCUA
 {
     public TimeSpan HeartbeatTimeout { get; set; } = TimeSpan.FromSeconds(10);
+    public TimeSpan SubscriptionWatchdogInterval { get; set; } = TimeSpan.FromSeconds(1);
+    public TimeSpan InputSubscriptionInterval { get; set; } = TimeSpan.FromMilliseconds(500);
     public string? UnitConversionServiceUrl { get; set; }
     public string ContractsPublicBaseUrl { get; set; } = RheometryContract.DefaultPublicBaseUrl;
     public List<RheometerSource>? Sources { get; set; }
@@ -50,6 +52,11 @@ public class ConfigurationForRheoSense : ConfigurationForOPCUA
     public void ValidateSources()
     {
         if (HeartbeatTimeout <= TimeSpan.Zero) throw new InvalidOperationException("HeartbeatTimeout must be positive.");
+        DWIS.Client.ReferenceImplementation.OPCFoundation.DWISClientOPCF.ValidateDataSubscriptionIntervals(InputSubscriptionInterval, InputSubscriptionInterval);
+        if (InputSubscriptionInterval >= HeartbeatTimeout)
+            throw new InvalidOperationException("InputSubscriptionInterval must be shorter than HeartbeatTimeout.");
+        if (SubscriptionWatchdogInterval <= TimeSpan.Zero || SubscriptionWatchdogInterval > HeartbeatTimeout)
+            throw new InvalidOperationException("SubscriptionWatchdogInterval must be positive and no longer than HeartbeatTimeout.");
         RheometryContract.ResolveUrls(ContractsPublicBaseUrl);
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         foreach (var installation in GetInstallations())

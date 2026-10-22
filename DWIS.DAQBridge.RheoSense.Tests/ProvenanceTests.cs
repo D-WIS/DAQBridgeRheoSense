@@ -46,7 +46,7 @@ public class ProvenanceTests
             Assert.Contains(descriptions, d => d.EndsWith("/purpose/Fann35Compatibility"));
             Assert.Contains(descriptions, d => d.EndsWith("/nonNewtonianTreatment/ModelConsistent"));
             Assert.Equal(6, descriptions.Count(d => d.Contains("/jsonMember/")));
-            var curve = manifest.InjectedNodes.First(n => n.TypeDictionaryURI == "ComputedData" && n.UniqueName.Contains("FlowCurveAt"));
+            var curve = manifest.InjectedNodes.First(n => n.TypeDictionaryURI == "JSonDataType" && n.UniqueName.Contains("FlowCurveAt"));
             var fields = manifest.InjectedNodes.SelectMany(node => node.Fields ?? Array.Empty<Field>()).ToArray();
             Assert.Contains(fields, field =>
                 field.FieldName == Attributes.JSonDataType_SchemaURL && field.FieldValue == RheometryContract.SchemaUrl);

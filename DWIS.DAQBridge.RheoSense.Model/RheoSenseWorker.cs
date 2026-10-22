@@ -56,6 +56,46 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
         return Task.CompletedTask;
     }
 
+    protected static void ObserveStates(RheoSenseInputSubscriptions subscriptions, RheoSenseStateData data)
+    {
+        foreach (var (property, node) in data.OPCUANodes.Value)
+        {
+            if (string.IsNullOrWhiteSpace(node.NameSpace)) continue;
+            var scalar = new ScalarDrillingProperty();
+            property.SetValue(data, scalar);
+            subscriptions.Add(node.NameSpace, node.PrefixID + node.ID, value =>
+            {
+                scalar.ScalarValue = null;
+                if (value is bool flag) scalar.ScalarValue = flag ? 1 : 0;
+                else DecodeValue(scalar, value, new UnitConversion());
+            });
+        }
+    }
+
+    protected static void ObserveTagSet(RheoSenseInputSubscriptions subscriptions,
+        RheoSenseInstrumentData data, RheoSenseOPCUATagSet tags, bool standardDeviation = false)
+    {
+        var conversions = tags.GetConversions(standardDeviation);
+        foreach (var (property, _) in data.OPCUANodes.Value)
+        {
+            if (property.GetValue(data) is null) data.CreateProperty(property);
+            if (property.GetValue(data) is not ScalarDrillingProperty scalar) continue;
+            var definition = tags.Resolve(property.Name, standardDeviation);
+            scalar.ScalarValue = null;
+            if (!definition.Enabled) continue;
+            var conversion = TryGetUnitConversion(conversions, property.Name, definition.NodeID ?? "", out var configured)
+                ? configured : new UnitConversion();
+            void Apply(object? value)
+            {
+                scalar.ScalarValue = null;
+                DecodeValue(scalar, value, conversion);
+            }
+            if (definition.ConstantValue is double constant) Apply(constant);
+            else if (!string.IsNullOrWhiteSpace(definition.NameSpace) && !string.IsNullOrWhiteSpace(definition.NodeID))
+                subscriptions.Add(definition.NameSpace, definition.NodeID, Apply);
+        }
+    }
+
     protected override async Task PublishOPCUAAsync(
         DWISDataWithOPCUA data,
         string? configuredNamespace,

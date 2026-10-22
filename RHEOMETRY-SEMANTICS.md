@@ -123,3 +123,11 @@ carry Extrapolated characterization, independent of non-Newtonian correction and
 compatibility classification. Additional temperature targets share the physical
 instrument while retaining distinct signal, uncertainty and condition identities.
 RheoSense provides this extension; it does not imply every producer publishes it.
+
+
+Flow-curve manifests use `JSonDataType` as their primary node type so the
+Blackboard accepts its `SchemaURL` and `MetaDataURL` fields. `ComputedData` and
+`FlowCurve` remain additional semantic classifications. The injector validates
+fields against the primary type; merely including a secondary JSON classification
+does not publish these fields. Restart the updated bridge to reinject its existing
+identities; no Blackboard database or configuration volume reset is needed.

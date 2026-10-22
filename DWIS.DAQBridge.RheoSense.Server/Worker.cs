@@ -1,4 +1,4 @@
-using DWIS.Client.ReferenceImplementation;
+﻿using DWIS.Client.ReferenceImplementation;
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.DAQBridge.RheoSense.Model;
 using DWIS.RigOS.Common.Worker;
@@ -182,7 +182,8 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
                 await RegisterToOPCUA(runtime.Sigma, installation.InputManifestName, RheoSenseConstants.Provider);
             }
             PlaceHolders = runtime.Targets;
-            await RegisterToBlackboard(runtime.Output, false);
+            // Refresh semantic fields even when an older provider already satisfies the value query.
+            await RegisterToBlackboard(runtime.Output, true);
             if (_DWISClient!.Inject(runtime.Output.CreatePhysicalLocationManifest())?.Success != true)
                 throw new InvalidOperationException("Could not publish the shared physical-location identity.");
             sources.Add(runtime);
@@ -196,25 +197,44 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
 
     private async Task RunBridgeUntilDisconnectedAsync(CancellationToken stoppingToken)
     {
-        TimeSpan opcPeriod = Configuration!.OPCUALoopDuration > TimeSpan.Zero
-            ? Configuration.OPCUALoopDuration
-            : TimeSpan.FromSeconds(1);
-        using PeriodicTimer timer = new(opcPeriod);
-
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        var subscriptions = new RheoSenseInputSubscriptions();
+        try
         {
-            if (!ConnectionsAreEstablished)
+            if (_OPCUAClient is DWISClientOPCF opcClient)
+                opcClient.ConfigureDataSubscription(Configuration!.InputSubscriptionInterval, Configuration.InputSubscriptionInterval);
+            foreach (var runtime in sources)
             {
-                await InvalidateSourcesAsync(stoppingToken);
-                return;
+                if (runtime.Installation.ExtrapolationId is null) ObserveStates(subscriptions, runtime.States);
+                ObserveTagSet(subscriptions, runtime.Input, runtime.Tags);
+                ObserveTagSet(subscriptions, runtime.Sigma, runtime.Tags, standardDeviation: true);
             }
-
-            try
+            subscriptions.Start((node, receive) =>
             {
+                if (!_OPCUAClient!.GetNameSpaceIndex(node.Namespace, out ushort ns))
+                    throw new InvalidOperationException("RheoSense input namespace is unavailable: " + node.Namespace);
+                // One node per callback: the DWIS client does not preserve per-node UserData on later notifications.
+                _OPCUAClient.Subscribe(node, (_, changes) =>
+                {
+                    if (changes.Length > 0) receive(changes[^1].Value);
+                }, new (ushort, string, object)[] { (ns, node.Id, node) });
+            });
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                bool notified = await subscriptions.WaitAsync(Configuration!.SubscriptionWatchdogInterval, stoppingToken);
+                // A PLC publishes related values together; combine that burst before mapping and publishing.
+                if (notified) await Task.Delay(TimeSpan.FromMilliseconds(50), stoppingToken);
+                subscriptions.ApplyPending();
+                if (!ConnectionsAreEstablished)
+                {
+                    await InvalidateSourcesAsync(stoppingToken);
+                    _opcConnectionNeedsRecovery = true;
+                    _blackboardConnectionNeedsRecovery = true;
+                    return;
+                }
                 foreach (var runtime in sources)
                 {
                     var primary = sources.First(s => s.Source.Id == runtime.Source.Id && s.Installation.ExtrapolationId is null);
-                    if (runtime == primary) await ReadStatesAsync(primary.States);
                     bool online = heartbeats[runtime.Source.Id].Observe(primary.States.RunningHeartbeat?.ScalarValue, DateTimeOffset.UtcNow, Configuration!.HeartbeatTimeout);
                     PlaceHolders = runtime.Targets;
                     if (!online)
@@ -229,29 +249,28 @@ public class Worker : RheoSenseWorker<ConfigurationForRheoSense>
                         runtime.Inactive = false;
                         Logger?.LogInformation("Heartbeat resumed for {Source}; restoring all output channels.", runtime.Installation.HistoryId);
                     }
-                    await ReadTagSetAsync(runtime.Input, runtime.Tags);
-                    await ReadOPCUAStandardDeviationTagSetAsync(runtime.Sigma, runtime.Tags);
-                    if (!ConnectionsAreEstablished) return;
-                    PlaceHolders = runtime.Targets;
+                    // Values are cached from notifications; snapshots suppress unchanged channel publications.
                     await ProcessSensorAsync(runtime.Installation.HistoryId, runtime.Input, runtime.Sigma, runtime.Output, runtime.State, stoppingToken);
                     if (!ConnectionsAreEstablished) return;
                 }
-
+                ConfigurationUpdater<ConfigurationForRheoSense>.Instance.UpdateConfiguration(this);
             }
-            catch (Exception ex)
-            {
-                Logger?.LogError(ex, "Error in RheoSense bridge exchange.");
-                await InvalidateSourcesAsync(stoppingToken);
-                // The OPC Foundation client can temporarily retain Connected=true
-                // after an operation has failed with BadNotConnected. Force both
-                // transports through their reconnect path instead of trusting that
-                // potentially stale flag.
-                _opcConnectionNeedsRecovery = true;
-                _blackboardConnectionNeedsRecovery = true;
-                return;
-            }
-
-            ConfigurationUpdater<ConfigurationForRheoSense>.Instance.UpdateConfiguration(this);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger?.LogError(ex, "Error in RheoSense bridge exchange.");
+            await InvalidateSourcesAsync(stoppingToken);
+            _opcConnectionNeedsRecovery = true;
+            _blackboardConnectionNeedsRecovery = true;
+        }
+        finally
+        {
+            subscriptions.Stop();
+            foreach (var client in new[] { _OPCUAClient, _DWISClient }.Distinct())
+                try { (client as IDisposable)?.Dispose(); }
+                catch (Exception ex) { Logger?.LogWarning(ex, "Could not close the RheoSense client session."); }
+            _opcConnectionNeedsRecovery = true;
+            _blackboardConnectionNeedsRecovery = true;
         }
     }
 

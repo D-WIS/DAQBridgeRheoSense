@@ -9,6 +9,28 @@ namespace DWIS.DAQBridge.RheoSense.Tests;
 
 public class SharedContractTests
 {
+    [Fact]
+    public void AllPlacementCurveFieldsBelongToThePrimaryManifestType()
+    {
+        foreach (var placement in Enum.GetValues<PlacementProfile>())
+        {
+            var source = new RheometerSource { Id = placement.ToString(), Placement = placement };
+            var data = RheometryContract.ApplyPublicBaseUrl(new RheometerOutputData(source), "http://contracts.example:54321/");
+            var curves = data.Manifests.Value.Where(p => p.Key.Name.StartsWith("FlowCurveAt")).ToArray();
+            Assert.NotEmpty(curves);
+            foreach (var pair in curves)
+            {
+                var node = Assert.Single(pair.Value.InjectedNodes.Where(n => (n.Fields ?? []).Any(f => f.FieldName == "SchemaURL")));
+                // Both the RDF and OPC-UA injectors resolve fields only on this type and its ancestors.
+                Assert.Equal("JSonDataType", node.TypeDictionaryURI);
+                Assert.Contains(node.Fields, f => f.FieldName == "SchemaURL" && f.FieldValue == "http://contracts.example:54321/Rheometry/v1/schema.json");
+                Assert.Contains(node.Fields, f => f.FieldName == "MetaDataURL" && f.FieldValue == "http://contracts.example:54321/Rheometry/v1/metadata.json");
+                Assert.Contains(pair.Value.InjectedReferences, r => r.Subject.ID == node.UniqueName && r.VerbURI == "http://ddhub.no/BelongsToClass" && r.Object.ID == "ComputedData");
+                Assert.Contains(pair.Value.InjectedReferences, r => r.Subject.ID == node.UniqueName && r.VerbURI == "http://ddhub.no/BelongsToClass" && r.Object.ID == "FlowCurve");
+            }
+        }
+    }
+
     [Theory]
     [InlineData("http://contracts.example:54321/")]
     [InlineData("https://contracts.example:8443/contracts/")]

@@ -25,8 +25,8 @@ stored as UTC instants.
 
 1. Each RheoSense instrument exposes numerical values through its configured
    OPC-UA tags. Means and standard deviations use separate tags.
-2. The server polls enabled sensors but processes only a sensor channel whose data
-   changed since its last successful publication.
+2. The server subscribes to enabled OPC-UA tags and wakes on data-change callbacks.
+   It processes only a sensor channel whose values changed since publication.
 3. Numerical shear-stress points are fitted to a Yield-Power-Law model using
    Mullineux, with Zamora/Kelessidis as fallback.
 4. The server publishes the fitted physical flow curve and simulated Fann 35
@@ -63,8 +63,10 @@ include:
   service, default `https://dwis.digiwells.no/`.
 - `ActivePitTags` and `FlowLineTags`: independent per-signal namespace, complete
   node ID, and optional unit-conversion maps.
-- `OPCUALoopDuration` and `ConnectionRetryInterval`: polling and recovery
-  periods.
+- `SubscriptionWatchdogInterval`: cached heartbeat/connection checks (default one
+  second, positive and no longer than `HeartbeatTimeout`); no recurring tag reads.
+- `ConnectionRetryInterval`: recovery delay. `OPCUALoopDuration` remains available
+  for source/sink helpers but no longer controls production-server acquisition.
 - `EnableDataLogging`, `DataLogDirectory`, `DataLogSegmentDuration`, and
   `MaximumDataLogStorageBytes`: compact-log behavior.
 - `WebAppTimeSpanHours`: persisted dashboard window from 1 to 48 hours.
@@ -302,3 +304,20 @@ Set the public scheme, host, port and optional path prefix through the existing 
 Merge this setting into the existing configuration; keep the instrument and Blackboard settings. It publishes `http://contracts.example:54321/Rheometry/v1/schema.json` and `http://contracts.example:54321/Rheometry/v1/metadata.json`. An HTTPS URL, IPv6 host, non-default port and path prefix are supported. The default remains `https://dwis.digiwells.no/`. Query strings, fragments, credentials, relative URLs and non-HTTP schemes are rejected.
 
 This setting selects the URLs advertised to consumers; configure the shared contract service to listen on that port and make it reachable from consumers separately. Restart the bridge after changing the configuration.
+
+
+Flow-curve manifests use `JSonDataType` as their primary node type so the
+Blackboard accepts its `SchemaURL` and `MetaDataURL` fields. `ComputedData` and
+`FlowCurve` remain additional semantic classifications. The injector validates
+fields against the primary type; merely including a secondary JSON classification
+does not publish these fields. Restart the updated bridge to reinject its existing
+identities; no Blackboard database or configuration volume reset is needed.
+
+The Blackboard must use vocabulary 1.0.176 or newer for these JSON fields.
+The bridge refreshes output manifests on startup even if matching signals already
+exist, so an upgrade adds missing contract fields to existing provider identities.
+
+`InputSubscriptionInterval` sets both OPC-UA sampling and publishing cadence
+(default 500 ms); it must be positive and shorter than `HeartbeatTimeout`. Choose
+an interval shorter than the PLC heartbeat dwell time so alternating states are
+observed. The server requires OPC Foundation client 2.2.54 for this setting.
