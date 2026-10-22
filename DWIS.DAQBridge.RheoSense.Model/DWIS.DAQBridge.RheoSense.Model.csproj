@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.7" />
     <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.7" />
+    <PackageReference Include="DWIS.RigOS.Contracts.Rheometry" Version="1.0.7" />
     <PackageReference Include="YPLCalibrationFromRheometer.Model" Version="1.0.0" />
     <PackageReference Include="DWIS.Client.ReferenceImplementation.OPCFoundation" Version="2.2.53" />
     <PackageReference Include="DWIS.Vocabulary.Schemas" Version="1.0.176" />

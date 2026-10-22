@@ -7,6 +7,7 @@ using OSDC.UnitConversion.Conversion;
 
 namespace DWIS.DAQBridge.RheoSense.Model
 {
+    [System.Text.Json.Serialization.JsonConverter(typeof(FlowCurveMeasurementConverter))]
     public class FlowCurveMeasurement
     {
         [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
