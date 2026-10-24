@@ -23,9 +23,6 @@ jobs:
           - name: OPC-UA Source
             dockerfile: DWIS.DAQBridge.RheoSense.OPCUASource/Dockerfile
             image: digiwells/dwisdaqbridgerheosenseopcuasource
-          - name: WebApp
-            dockerfile: DWIS.DAQBridge.RheoSense.WebApp/Dockerfile
-            image: digiwells/dwisdaqbridgerheosensewebapp
 
     steps:
       - name: Check out code

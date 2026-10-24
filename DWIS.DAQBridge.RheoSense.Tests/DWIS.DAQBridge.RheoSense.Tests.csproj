@@ -17,6 +17,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DWIS.DAQBridge.RheoSense.Model\DWIS.DAQBridge.RheoSense.Model.csproj" />
-    <ProjectReference Include="..\DWIS.DAQBridge.RheoSense.WebApp\DWIS.DAQBridge.RheoSense.WebApp.csproj" />
   </ItemGroup>
 </Project>

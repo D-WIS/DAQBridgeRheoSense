@@ -1,6 +1,6 @@
 # DWIS.DAQBridge.RheoSense.Tests
 
-xUnit regression tests for the shared model and WebApp history helpers. The
+xUnit regression tests for the shared model and bridge runtime. The
 project is not packaged or deployed.
 
 ## Covered behavior
@@ -18,7 +18,6 @@ project is not packaged or deployed.
 - Compact logging, UTC normalization, compression, retention, and sensor
   separation.
 - Eight-bucket, 48-hour Blackboard history layout.
-- WebApp history restoration, filtering, downsampling, and flow curves.
 
 Filesystem tests create isolated temporary directories and do not use the
 repository's `home` directory or deployed log storage.

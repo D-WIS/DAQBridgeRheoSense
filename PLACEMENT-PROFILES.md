@@ -86,7 +86,7 @@ The default simulation channel cadences remain 10 seconds for conditions,
 Legacy active-pit/flow-line compact history stays in v1 format. Additional sources
 use source-named v2 compact streams and source-scoped Blackboard history buckets;
 they are included in the same retention budget. The legacy RheoSense-specific
-WebApp remains a two-position viewer; DAQDisplay discovers every configured source.
+DAQDisplay discovers every configured source and provides the shared visualization.
 
 Publication queries use the framework's `http://ddhub.no/<provider>/` node
 namespace convention. A source may set `BlackboardNodeNamespace` for a server

@@ -12,7 +12,7 @@ source identity and measured pressure. Query bindings are kept per source.
 
 This project is intended for development, demonstrations, and end-to-end
 diagnostics. It does not persist data and is not required by the production
-server or WebApp.
+server or DAQDisplay.
 
 ## Configuration
 

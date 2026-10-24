@@ -1,7 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text;
-using DWIS.DAQBridge.RheoSense.WebApp.Services;
 using DWIS.DAQBridge.RheoSense.Model;
 using DWIS.RigOS.Common.Worker;
 using OSDC.DotnetLibraries.Drilling.DrillingProperties;
@@ -214,7 +213,6 @@ public class ModelTests
         Assert.Equal("/home", configuration.DataLogDirectory);
         Assert.Equal(TimeSpan.FromHours(6), configuration.DataLogSegmentDuration);
         Assert.Equal(1024L * 1024L * 1024L, configuration.MaximumDataLogStorageBytes);
-        Assert.Equal(6, configuration.WebAppTimeSpanHours);
         Assert.Equal(TimeSpan.FromSeconds(10), configuration.SimulationConditionGenerationPeriod);
         Assert.Equal(TimeSpan.FromMinutes(30), configuration.SimulationDataGenerationPeriod);
         Assert.Equal(TimeSpan.FromMinutes(5), configuration.SimulationOPCUAPublishPeriod);
@@ -346,181 +344,6 @@ public class ModelTests
 
         Assert.Same(measuredPressure, output.MeasuredPressure);
         Assert.NotNull(output.FlowCurveAtMeasuredTemperatureAndPressure);
-    }
-
-    [Fact]
-    public void WebApp_history_retains_at_most_48_hours_and_returns_requested_window()
-    {
-        RheoSenseHistoryStore store = new();
-        DateTimeOffset now = new(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
-        YplValues values = new(1, 2, 3);
-
-        store.Add(new YplTrendSample(now.AddHours(-49), values, values, values, values));
-        store.Add(new YplTrendSample(now.AddHours(-2), values, values, values, values));
-        store.Add(new YplTrendSample(now, values, values, values, values));
-
-        IReadOnlyList<YplTrendSample> samples = store.GetWindow(TimeSpan.FromHours(1), now);
-
-        Assert.Single(samples);
-        Assert.Equal(now, samples[0].TimestampUtc);
-        Assert.Equal(now, store.LastSampleUtc);
-    }
-
-    [Fact]
-    public void WebApp_history_downsamples_before_chart_preparation_and_preserves_endpoints()
-    {
-        RheoSenseHistoryStore store = new();
-        DateTimeOffset start = new(2026, 10, 16, 0, 0, 0, TimeSpan.Zero);
-        YplValues values = new(1, 2, 3);
-        for (int index = 0; index < 10_000; index++)
-        {
-            DateTimeOffset timestamp = start.AddSeconds(index);
-            store.Add(new YplTrendSample(timestamp, values, values, values, values));
-        }
-
-        DateTimeOffset end = start.AddSeconds(9_999);
-        IReadOnlyList<YplTrendSample> samples = store.GetWindowDownsampled(
-            TimeSpan.FromHours(48),
-            end,
-            300);
-
-        Assert.Equal(300, samples.Count);
-        Assert.Equal(start, samples[0].TimestampUtc);
-        Assert.Equal(end, samples[^1].TimestampUtc);
-        Assert.True(samples.Zip(samples.Skip(1), (left, right) => left.TimestampUtc < right.TimestampUtc).All(result => result));
-    }
-
-    [Fact]
-    public void WebApp_history_downsamples_conditions_and_rheology_independently()
-    {
-        RheoSenseHistoryStore store = new();
-        DateTimeOffset start = new(2026, 10, 16, 0, 0, 0, TimeSpan.Zero);
-        for (int index = 0; index < 1_000; index++)
-        {
-            store.Add(new YplTrendSample(
-                start.AddSeconds(index * 10),
-                YplValues.Empty,
-                YplValues.Empty,
-                YplValues.Empty,
-                YplValues.Empty,
-                new ConditionValues(300 + index, 200_000, 1_180, 1_181)));
-        }
-        store.Add(new YplTrendSample(
-            start.AddHours(3),
-            new YplValues(1, 2, 3),
-            YplValues.Empty,
-            YplValues.Empty,
-            YplValues.Empty));
-
-        IReadOnlyList<YplTrendSample> conditions = store.GetConditionWindowDownsampled(
-            TimeSpan.FromHours(48),
-            start.AddHours(4),
-            100);
-        IReadOnlyList<YplTrendSample> rheology = store.GetYplWindowDownsampled(
-            TimeSpan.FromHours(48),
-            start.AddHours(4),
-            100);
-
-        Assert.Equal(100, conditions.Count);
-        Assert.Single(rheology);
-        Assert.True(rheology[0].HasYplValues);
-    }
-
-    [Fact]
-    public async Task WebApp_history_reader_restores_YPL_values_from_compact_published_log()
-    {
-        DateTimeOffset timestamp = new(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
-        string jsonLines = """
-            {"type":"schema","format":"rheosense.published.v1","units":"SI","fields":["YPLYieldStressAtMeasuredTemperatureAndPressure.mean","YPLConsistencyIndexAtMeasuredTemperatureAndPressure.mean","YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.mean","YPLYieldStressAtExtrapolatedTemperatureAndPressure.mean","YPLConsistencyIndexAtExtrapolatedTemperatureAndPressure.mean","YPLFlowBehaviorIndexAtExtrapolatedTemperatureAndPressure.mean"],"curves":[],"curveFields":[]}
-            {"t":"2026-10-16T12:00:00+00:00","ap":[1,2,3,4,5,6],"apc":[],"fl":[7,8,9,10,11,12],"flc":[]}
-            """;
-        await using MemoryStream stream = new(Encoding.UTF8.GetBytes(jsonLines));
-
-        IReadOnlyList<YplTrendSample> samples = await RheoSenseHistoryLogReader.ReadJsonLinesAsync(
-            stream,
-            timestamp.AddHours(-1),
-            timestamp.AddHours(1));
-
-        YplTrendSample sample = Assert.Single(samples);
-        Assert.Equal(new YplValues(1, 2, 3), sample.ActivePitMeasured);
-        Assert.Equal(new YplValues(4, 5, 6), sample.ActivePitExtrapolated);
-        Assert.Equal(new YplValues(7, 8, 9), sample.FlowLineMeasured);
-        Assert.Equal(new YplValues(10, 11, 12), sample.FlowLineExtrapolated);
-    }
-
-    [Fact]
-    public async Task WebApp_history_reader_restores_conditions_without_duplicating_YPL_samples()
-    {
-        DateTimeOffset timestamp = new(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
-        string jsonLines = """
-            {"type":"schema","format":"rheosense.published.v1","units":"SI","fields":["YPLYieldStressAtMeasuredTemperatureAndPressure.mean","YPLConsistencyIndexAtMeasuredTemperatureAndPressure.mean","YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.mean","YPLYieldStressAtExtrapolatedTemperatureAndPressure.mean","YPLConsistencyIndexAtExtrapolatedTemperatureAndPressure.mean","YPLFlowBehaviorIndexAtExtrapolatedTemperatureAndPressure.mean"],"curves":[],"curveFields":[]}
-            {"t":"2026-10-16T12:00:00+00:00","c":"DensityPressureTemperature","ap":[300,0.1,200000,0,1180,0.2,1181,0.3],"apc":[],"fl":[],"flc":[]}
-            {"t":"2026-10-16T12:01:00+00:00","c":"Rheology","ap":[7,8,9,10,11,12],"apc":[],"fl":[],"flc":[]}
-            """;
-        await using MemoryStream stream = new(Encoding.UTF8.GetBytes(jsonLines));
-
-        IReadOnlyList<YplTrendSample> samples = await RheoSenseHistoryLogReader.ReadJsonLinesAsync(
-            stream,
-            timestamp.AddHours(-1),
-            timestamp.AddHours(1));
-
-        Assert.Equal(2, samples.Count);
-        YplTrendSample conditions = samples[0];
-        Assert.Equal(timestamp, conditions.TimestampUtc);
-        Assert.False(conditions.HasYplValues);
-        Assert.Equal(new ConditionValues(300, 200000, 1180, 1181), conditions.ActivePitConditions);
-
-        YplTrendSample rheology = samples[1];
-        Assert.Equal(timestamp.AddMinutes(1), rheology.TimestampUtc);
-        Assert.True(rheology.HasYplValues);
-        Assert.Equal(new YplValues(7, 8, 9), rheology.ActivePitMeasured);
-    }
-
-    [Fact]
-    public async Task WebApp_history_reader_restores_true_and_Fann35_flow_curves()
-    {
-        DateTimeOffset timestamp = new(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
-        RheoSenseInstrumentData input = CreateMeasuredCurve(4.5, 0.65, 0.72);
-        input.MeasuredTemperature = Scalar(300);
-        input.MeasuredPressure = Scalar(200_000);
-        foreach (int rpm in new[] { 3, 6, 10, 20, 30, 60, 100, 200, 300, 600 })
-        {
-            typeof(RheoSenseInstrumentData)
-                .GetProperty($"ShearStressAt{rpm}RPMAtExtraplatedTemperatureAndPressure")!
-                .SetValue(input, PipeStress(rpm, 4.1, 0.57, 0.68));
-        }
-        input.ExtrapolatedTemperature = Scalar(333.15);
-        input.ExtrapolatedPressure = Scalar(5_000_000);
-        ActivePitOutputData output = new();
-        RheoSenseBridgeMapper.Map(input, output);
-        RheoSenseCompactLogEntry entry = RheoSenseDataLogWriter.CreatePublishedSensorEntry(
-            timestamp,
-            RheoSenseSensorPosition.ActivePit,
-            output,
-            RheoSenseDataChannel.Rheology);
-        await using MemoryStream stream = new(Encoding.UTF8.GetBytes(
-            entry.SchemaLine + Environment.NewLine + entry.RecordLine + Environment.NewLine));
-
-        IReadOnlyList<YplTrendSample> samples = await RheoSenseHistoryLogReader.ReadJsonLinesAsync(
-            stream,
-            timestamp.AddHours(-1),
-            timestamp.AddHours(1));
-
-        FlowCurveSnapshot curves = Assert.IsType<FlowCurveSnapshot>(Assert.Single(samples).ActivePitFlowCurves);
-        Assert.Equal(300, curves.MeasuredTemperature);
-        Assert.Equal(200_000, curves.MeasuredPressure);
-        Assert.Equal(333.15, curves.ExtrapolatedTemperature);
-        Assert.Equal(5_000_000, curves.ExtrapolatedPressure);
-        Assert.Equal(10, curves.TrueAtMeasuredConditions.Count);
-        Assert.Equal(10, curves.Fann35AtMeasuredConditions.Count);
-        Assert.Equal(10, curves.TrueAtExtrapolatedConditions.Count);
-        Assert.Equal(10, curves.Fann35AtExtrapolatedConditions.Count);
-        Assert.NotEqual(
-            curves.TrueAtMeasuredConditions[0].ShearRate,
-            curves.Fann35AtMeasuredConditions[0].ShearRate);
-        Assert.NotEqual(
-            curves.TrueAtMeasuredConditions[0].ShearStress,
-            curves.Fann35AtMeasuredConditions[0].ShearStress);
     }
 
     [Fact]

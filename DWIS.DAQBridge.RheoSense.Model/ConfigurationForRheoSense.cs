@@ -89,7 +89,6 @@ public class ConfigurationForRheoSense : ConfigurationForOPCUA
     public string DataLogDirectory { get; set; } = "/home";
     public TimeSpan DataLogSegmentDuration { get; set; } = TimeSpan.FromHours(6);
     public long MaximumDataLogStorageBytes { get; set; } = 1024L * 1024L * 1024L;
-    public int WebAppTimeSpanHours { get; set; } = 6;
     public int SimulationSeed { get; set; } = 20261016;
     public TimeSpan SimulationConditionGenerationPeriod { get; set; } = TimeSpan.FromSeconds(10);
     public TimeSpan SimulationDataGenerationPeriod { get; set; } = TimeSpan.FromMinutes(30);

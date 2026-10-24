@@ -18,8 +18,7 @@ stored as UTC instants.
 | [Server](DWIS.DAQBridge.RheoSense.Server/README.md) | Production bridge from configured RheoSense OPC-UA tag sets to semantic Blackboard outputs. |
 | [OPCUASource](DWIS.DAQBridge.RheoSense.OPCUASource/README.md) | Synthetic two-sensor OPC-UA source for development and end-to-end testing. |
 | [BlackboardSink](DWIS.DAQBridge.RheoSense.BlackboardSink/README.md) | Diagnostic semantic consumer used to verify Blackboard publication. |
-| [WebApp](DWIS.DAQBridge.RheoSense.WebApp/README.md) | MudBlazor dashboard for conditions, fitted YPL parameters, and flow curves. |
-| [Tests](DWIS.DAQBridge.RheoSense.Tests/README.md) | xUnit coverage for mapping, semantics, configuration, logging, history, and WebApp data preparation. |
+| [Tests](DWIS.DAQBridge.RheoSense.Tests/README.md) | xUnit coverage for mapping, semantics, configuration, logging, and history. |
 
 ## Data flow
 
@@ -33,8 +32,10 @@ stored as UTC instants.
    Couette response, together with fitted YPL parameters and condition data.
 5. Compact raw and published records are written to disk and retained in
    rotating 48-hour OPC-UA history buckets on the Blackboard.
-6. The WebApp reads published Blackboard history and presents unit- and
-   time-reference-aware trends and rheograms.
+6. DAQDisplay provides the shared rheometry display and interprets provider data
+   using the schema and metadata URLs advertised on the Blackboard.
+
+The standalone RheoSense dashboard has been retired; visualization belongs to DAQDisplay.
 
 RheoSense supplies no flow-curve object over OPC-UA. The curves are bridge
 outputs constructed from the ten shear-stress values at 3, 6, 10, 20, 30, 60,
@@ -49,9 +50,10 @@ in SI `rad/s`; other curve values use `1/s`, `N.m`, and `Pa` as applicable.
 
 ## Shared configuration
 
-The worker applications and WebApp use the untracked runtime file
+The worker applications use the untracked runtime file
 `home/config.json`. In Linux containers it is located at `/home/config.json`;
-mount `/home` as a persistent volume. Copy
+mount `/home` as a persistent volume. Existing configurations may retain the retired
+`WebAppTimeSpanHours` setting; workers ignore it and no migration is required. Copy
 [`config/config.example.json`](config/config.example.json) to
 `home/config.json` for an initial local configuration. Important settings
 include:
@@ -69,7 +71,6 @@ include:
   for source/sink helpers but no longer controls production-server acquisition.
 - `EnableDataLogging`, `DataLogDirectory`, `DataLogSegmentDuration`, and
   `MaximumDataLogStorageBytes`: compact-log behavior.
-- `WebAppTimeSpanHours`: persisted dashboard window from 1 to 48 hours.
 - `SimulationConditionGenerationPeriod`, `SimulationDataGenerationPeriod`, and
   `SimulationOPCUAPublishPeriod`: synthetic-source timing.
 
@@ -109,8 +110,8 @@ when necessary to enforce the limit.
 
 The server also stores raw and published entries in eight rotating six-hour
 buckets per sensor and data kind on the OPC-UA part of the Blackboard. Node IDs
-follow `RheoSense.<ActivePit|FlowLine>.<Raw|Published>.History.<0-7>`. The WebApp
-reads the 16 published buckets; raw buckets remain available for diagnostics.
+follow `RheoSense.<ActivePit|FlowLine>.<Raw|Published>.History.<0-7>`. Published
+and raw buckets remain available to consumers and diagnostic tools.
 
 ## Build and test
 
@@ -132,12 +133,7 @@ dotnet test .\DWIS.DAQBridge.RheoSense.sln --no-build
 3. Run `DWIS.DAQBridge.RheoSense.Server`.
 4. Optionally run `DWIS.DAQBridge.RheoSense.BlackboardSink` for console-level
    semantic verification.
-5. Run `DWIS.DAQBridge.RheoSense.WebApp` and open
-   `http://localhost:5080/RheoSense/webapp`.
-
-The WebApp's OSDC unit and time-reference selector defaults to the unit service
-at `https://app.digiwells.no/`. Override `UnitConversionHostURL` when another
-service deployment is required.
+5. Use the Online rheometry page in DAQDisplay to view the published data.
 
 ## Docker images
 
@@ -148,7 +144,6 @@ immutable `sha-<commit>` tags for:
 
 - `digiwells/dwisdaqbridgerheosenseserver`
 - `digiwells/dwisdaqbridgerheosenseopcuasource`
-- `digiwells/dwisdaqbridgerheosensewebapp`
 
 The repository requires `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD` GitHub
 Actions secrets. Docker builds use the repository root as their context.
@@ -184,17 +179,6 @@ docker run -d --name rheosense-server --restart unless-stopped --pull always `
   digiwells/dwisdaqbridgerheosenseserver:stable
 ```
 
-Run the WebApp and publish it on host port 5080:
-
-```powershell
-docker run -d --name rheosense-webapp --restart unless-stopped --pull always `
-  --mount "type=bind,source=C:/Volumes/DWISBridgeRheoSense,target=/home" `
-  -p 5080:8080 `
-  digiwells/dwisdaqbridgerheosensewebapp:stable
-```
-
-Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
-
 ### Run on Linux
 
 Create the shared host directory and install the initial configuration:
@@ -206,7 +190,7 @@ cp ./config/config.example.json "$HOME/Volumes/DWISBridgeRheoSense/config.json"
 
 Edit `$HOME/Volumes/DWISBridgeRheoSense/config.json` before starting the
 containers. Then grant the container user ownership so the server can write
-logs and the WebApp can persist preferences and data-protection keys:
+its compact data logs:
 
 ```bash
 sudo chown -R 1654:1654 "$HOME/Volumes/DWISBridgeRheoSense"
@@ -232,18 +216,6 @@ docker run -d --name rheosense-server --restart unless-stopped --pull always \
   --mount type=bind,source="$HOME/Volumes/DWISBridgeRheoSense",target=/home \
   digiwells/dwisdaqbridgerheosenseserver:stable
 ```
-
-Run the WebApp and publish it on host port 5080:
-
-```bash
-docker run -d --name rheosense-webapp --restart unless-stopped --pull always \
-  --add-host host.docker.internal:host-gateway \
-  --mount type=bind,source="$HOME/Volumes/DWISBridgeRheoSense",target=/home \
-  -p 5080:8080 \
-  digiwells/dwisdaqbridgerheosensewebapp:stable
-```
-
-Open `http://localhost:5080/RheoSense/webapp` after the WebApp starts.
 
 ## DWIS dependency and semantic update
 
