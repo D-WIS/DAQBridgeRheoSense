@@ -293,3 +293,5 @@ exist, so an upgrade adds missing contract fields to existing provider identitie
 (default 500 ms); it must be positive and shorter than `HeartbeatTimeout`. Choose
 an interval shorter than the PLC heartbeat dwell time so alternating states are
 observed. The server requires OPC Foundation client 2.2.54 for this setting.
+
+The query lifecycle dependency release uses OPC Foundation client 2.2.55 (directly or through mechanical bridge 1.0.6) and Common.Worker 1.0.8 where applicable. Repeated query registrations are deduplicated and released when their session closes. Existing configuration and persistent volumes are preserved.

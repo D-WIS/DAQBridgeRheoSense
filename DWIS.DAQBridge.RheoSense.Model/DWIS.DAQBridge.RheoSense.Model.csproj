@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,11 +11,11 @@
     <PackageReference Include="OSDC.UnitConversion.Conversion.DrillingEngineering" Version="3.4.5" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.7" />
-    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.7" />
-    <PackageReference Include="DWIS.RigOS.Contracts.Rheometry" Version="1.0.7" />
+    <PackageReference Include="DWIS.RigOS.Common.Model" Version="1.0.8" />
+    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.8" />
+    <PackageReference Include="DWIS.RigOS.Contracts.Rheometry" Version="1.0.8" />
     <PackageReference Include="YPLCalibrationFromRheometer.Model" Version="1.0.0" />
-    <PackageReference Include="DWIS.Client.ReferenceImplementation.OPCFoundation" Version="2.2.54" />
+    <PackageReference Include="DWIS.Client.ReferenceImplementation.OPCFoundation" Version="2.2.55" />
     <PackageReference Include="DWIS.Vocabulary.Schemas" Version="1.0.176" />
     <PackageReference Include="OSDC.DotnetLibraries.Drilling.DrillingProperties" Version="10.2.11" />
   </ItemGroup>
