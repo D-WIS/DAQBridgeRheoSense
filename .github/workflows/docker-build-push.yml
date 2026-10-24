@@ -10,7 +10,17 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Test models and source connection recovery
+        run: dotnet test DWIS.DAQBridge.RheoSense.sln -c Release
   build-and-push:
+    needs: verify
     name: Build and push ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:

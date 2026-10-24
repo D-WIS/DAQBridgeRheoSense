@@ -79,3 +79,5 @@ identities; no Blackboard database or configuration volume reset is needed.
 shared-node fanout, stopped-session callback isolation, cancellation, conversions,
 constant/disabled tags, independent uncertainties, heartbeat timeout/recovery and
 watchdog interval validation.
+
+`SourceReconnectTests` drives the actual source worker with an in-memory OPC-UA client double: unavailable startup, session loss after publishing, registration failures, thrown/false-returning writes, disposal, restored current values and cancellation during a long retry delay. No sockets or shared Blackboard data are used.

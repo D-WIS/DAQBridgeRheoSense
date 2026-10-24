@@ -16,6 +16,8 @@ namespace DWIS.DAQBridge.RheoSense.Model;
 public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TConfiguration, object>
     where TConfiguration : ConfigurationForOPCUA, new()
 {
+    protected virtual bool RequireSuccessfulOPCUAWrites => false;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -210,6 +212,7 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
     {
         if (_OPCUAClient is null || !_OPCUAClient.Connected)
         {
+            if (RequireSuccessfulOPCUAWrites) throw new IOException("RheoSense OPC-UA source connection is unavailable.");
             return;
         }
 
@@ -241,7 +244,9 @@ public abstract class RheoSenseWorker<TConfiguration> : DWISWorkerWithOPCUA<TCon
                 value = conversion.FromSI(scalar);
             }
 
-            _OPCUAClient.UpdateAnyVariables(new[] { (ns, id, value, DateTime.UtcNow) });
+            bool written = _OPCUAClient.UpdateAnyVariables(new[] { (ns, id, value, DateTime.UtcNow) });
+            if (RequireSuccessfulOPCUAWrites && !written)
+                throw new IOException("Could not publish RheoSense source variable " + id);
         }
 
         await Task.Yield();

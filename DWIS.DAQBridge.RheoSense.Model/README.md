@@ -158,3 +158,5 @@ heartbeat expiry; it does not poll measurements.
 (default 500 ms); it must be positive and shorter than `HeartbeatTimeout`. Choose
 an interval shorter than the PLC heartbeat dwell time so alternating states are
 observed. The server requires OPC Foundation client 2.2.54 for this setting.
+
+The OPC-UA simulator opts into strict connection/write-failure reporting from the model publishing helpers so its session loop can reconnect and republish current values. Other bridge/sink callers retain their existing publication behavior. No signal schema or wire-format changes are introduced.

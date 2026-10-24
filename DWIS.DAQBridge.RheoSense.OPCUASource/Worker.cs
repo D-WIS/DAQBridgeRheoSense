@@ -1,3 +1,4 @@
+using DWIS.Client.ReferenceImplementation;
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.DAQBridge.RheoSense.Model;
 using DWIS.RigOS.Common.Worker;
@@ -20,67 +21,126 @@ public class Worker(ILogger<IDWISWorker<ConfigurationForRheoSense>> logger, ILog
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        ConnectToOPCUA();
-        if (Configuration is null || _OPCUAClient?.Connected != true) return;
+        if (Configuration is null) throw new InvalidOperationException("Source configuration is unavailable.");
         Configuration.ValidateSources();
         var sources = Configuration.GetInstallations().Select(installation => new SourceRuntime(installation,
             installation.HistoryId.Aggregate(Configuration.SimulationSeed, (seed, c) => unchecked(seed * 31 + c)))).ToArray();
         foreach (var source in sources)
         {
-            await RheoSenseUnitConversions.ConfigureAsync(Configuration, source.Tags, cancellationToken: stoppingToken);
-            ConfigureOPCUANodes(source.Data, source.Tags);
-            ConfigureOPCUANodes(source.Sigma, source.Tags, standardDeviation: true);
-            if (source.Installation.ExtrapolationId is null) await RegisterToOPCUA(source.States, source.Installation.InputManifestName, RheoSenseConstants.Provider);
-            await RegisterToOPCUA(source.Data, source.Installation.InputManifestName, RheoSenseConstants.Provider);
-            await RegisterToOPCUA(source.Sigma, source.Installation.InputManifestName, RheoSenseConstants.Provider);
             FillConditions(source.Data, 0, source.Random, source.Index);
             FillRheology(source.Data, 0, source.Index);
             FillStandardDeviations(source.Sigma, source.Index);
-            await PublishOPCUATagSetAsync(source.Data, source.Tags, stoppingToken);
-            await PublishOPCUAStandardDeviationTagSetAsync(source.Sigma, source.Tags, stoppingToken);
+            source.States.RunningHeartbeat = Scalar(1);
+            source.States.Automatic = Scalar(1);
+            source.States.Gel10SecondsActive = Scalar(0);
+            source.States.Gel10MinutesActive = Scalar(0);
+            source.States.OperatingHours = Scalar(0);
         }
-        DateTime started = DateTime.UtcNow;
+        DateTime started = UtcNow;
         TimeSpan conditions = Configuration.SimulationConditionGenerationPeriod > TimeSpan.Zero ? Configuration.SimulationConditionGenerationPeriod : TimeSpan.FromSeconds(10);
         TimeSpan generation = Configuration.SimulationDataGenerationPeriod > TimeSpan.Zero ? Configuration.SimulationDataGenerationPeriod : TimeSpan.FromMinutes(30);
         TimeSpan publish = Configuration.SimulationOPCUAPublishPeriod > TimeSpan.Zero ? Configuration.SimulationOPCUAPublishPeriod : TimeSpan.FromMinutes(5);
         DateTime nextGeneration = started + generation, nextPublish = started + publish, nextConditions = started;
         int heartbeat = 1;
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        await RunSourceSessionsAsync(async token =>
         {
-            DateTime now = DateTime.UtcNow;
-            heartbeat = heartbeat == 1 ? 2 : 1;
-            foreach (var source in sources.Where(s => s.Installation.ExtrapolationId is null))
-            {
-                source.States.RunningHeartbeat = Scalar(heartbeat);
-                source.States.Automatic = Scalar(1);
-                source.States.Gel10SecondsActive = Scalar(0);
-                source.States.Gel10MinutesActive = Scalar(0);
-                source.States.OperatingHours = Scalar((now - started).TotalHours);
-                // OperationTime encoding is unspecified by IMS; do not simulate an invented value.
-                await PublishOPCUAAsync(source.States, null, null, null, stoppingToken);
-            }
-            if (now < nextConditions) continue;
-            nextConditions = AdvanceSchedule(nextConditions, conditions, now);
-            bool generate = now >= nextGeneration;
-            bool publishRheology = generate || now >= nextPublish;
             foreach (var source in sources)
             {
-                FillConditions(source.Data, (now - started).TotalSeconds, source.Random, source.Index);
-                FillConditionStandardDeviations(source.Sigma, source.Index);
-                await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, stoppingToken);
-                await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, stoppingToken);
-                if (generate) FillRheology(source.Data, (now - started).TotalSeconds, source.Index);
-                if (publishRheology)
-                {
-                    await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.Rheology, stoppingToken);
-                    await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.Rheology, stoppingToken);
-                }
+                await RheoSenseUnitConversions.ConfigureAsync(Configuration, source.Tags, cancellationToken: token);
+                ConfigureOPCUANodes(source.Data, source.Tags);
+                ConfigureOPCUANodes(source.Sigma, source.Tags, standardDeviation: true);
+                if (source.Installation.ExtrapolationId is null) await RegisterToOPCUA(source.States, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+                await RegisterToOPCUA(source.Data, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+                await RegisterToOPCUA(source.Sigma, source.Installation.InputManifestName, RheoSenseConstants.Provider);
+                if (source.Installation.ExtrapolationId is null)
+                    await PublishOPCUAAsync(source.States, null, null, null, token);
+                await PublishOPCUATagSetAsync(source.Data, source.Tags, token);
+                await PublishOPCUAStandardDeviationTagSetAsync(source.Sigma, source.Tags, token);
             }
-            if (generate) nextGeneration = AdvanceSchedule(nextGeneration, generation, now);
-            if (publishRheology) nextPublish = AdvanceSchedule(nextPublish, publish, now);
-        }
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+            while (await WaitForTickAsync(timer, token))
+            {
+                EnsureSourceConnected();
+                DateTime now = UtcNow;
+                heartbeat = heartbeat == 1 ? 2 : 1;
+                foreach (var source in sources.Where(s => s.Installation.ExtrapolationId is null))
+                {
+                    source.States.RunningHeartbeat = Scalar(heartbeat);
+                    source.States.Automatic = Scalar(1);
+                    source.States.Gel10SecondsActive = Scalar(0);
+                    source.States.Gel10MinutesActive = Scalar(0);
+                    source.States.OperatingHours = Scalar((now - started).TotalHours);
+                    // OperationTime encoding is unspecified by IMS; do not simulate an invented value.
+                    await PublishOPCUAAsync(source.States, null, null, null, token);
+                }
+                if (now < nextConditions) continue;
+                nextConditions = AdvanceSchedule(nextConditions, conditions, now);
+                bool generate = now >= nextGeneration;
+                bool publishRheology = generate || now >= nextPublish;
+                foreach (var source in sources)
+                {
+                    FillConditions(source.Data, (now - started).TotalSeconds, source.Random, source.Index);
+                    FillConditionStandardDeviations(source.Sigma, source.Index);
+                    await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, token);
+                    await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.DensityPressureTemperature, token);
+                    if (generate) FillRheology(source.Data, (now - started).TotalSeconds, source.Index);
+                    if (publishRheology)
+                    {
+                        await PublishOPCUATagSetChannelAsync(source.Data, source.Tags, RheoSenseDataChannel.Rheology, token);
+                        await PublishOPCUAStandardDeviationTagSetChannelAsync(source.Sigma, source.Tags, RheoSenseDataChannel.Rheology, token);
+                    }
+                }
+                if (generate) nextGeneration = AdvanceSchedule(nextGeneration, generation, now);
+                if (publishRheology) nextPublish = AdvanceSchedule(nextPublish, publish, now);
+            }
+        }, stoppingToken);
     }
+
+    protected virtual DateTime UtcNow => DateTime.UtcNow;
+    protected override bool RequireSuccessfulOPCUAWrites => true;
+    protected virtual IOPCUADWISClient? OpenSourceClient()
+    {
+        ConnectToOPCUA();
+        return _OPCUAClient;
+    }
+    protected virtual Task<bool> WaitForTickAsync(PeriodicTimer timer, CancellationToken token) => timer.WaitForNextTickAsync(token).AsTask();
+    protected virtual Task WaitBeforeReconnectAsync(CancellationToken token) =>
+        Task.Delay(Configuration?.ConnectionRetryInterval > TimeSpan.Zero ? Configuration.ConnectionRetryInterval : TimeSpan.FromSeconds(5), token);
+
+    private void EnsureSourceConnected()
+    {
+        if (_OPCUAClient?.Connected != true) throw new IOException("RheoSense source lost its OPC-UA connection.");
+    }
+
+    private async Task RunSourceSessionsAsync(Func<CancellationToken, Task> publishSession, CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    token.ThrowIfCancellationRequested();
+                    _OPCUAClient = OpenSourceClient();
+                    EnsureSourceConnected();
+                    Logger?.LogInformation("RheoSense source connected; registering variables and restoring current values.");
+                    await publishSession(token);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested) { break; }
+                catch (Exception ex) { Logger?.LogWarning(ex, "RheoSense source will retry its OPC-UA connection."); }
+                finally
+                {
+                    var client = _OPCUAClient;
+                    _OPCUAClient = null;
+                    try { (client as IDisposable)?.Dispose(); }
+                    catch (Exception ex) { Logger?.LogWarning(ex, "Could not close the RheoSense source session."); }
+                }
+                if (!token.IsCancellationRequested) await WaitBeforeReconnectAsync(token);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+    }
+
     private static DateTime AdvanceSchedule(DateTime next, TimeSpan period, DateTime now)
     {
         do

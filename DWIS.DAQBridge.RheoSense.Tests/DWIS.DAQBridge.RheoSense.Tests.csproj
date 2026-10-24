@@ -18,4 +18,5 @@
   <ItemGroup>
     <ProjectReference Include="..\DWIS.DAQBridge.RheoSense.Model\DWIS.DAQBridge.RheoSense.Model.csproj" />
   </ItemGroup>
+  <ItemGroup><ProjectReference Include="../DWIS.DAQBridge.RheoSense.OPCUASource/DWIS.DAQBridge.RheoSense.OPCUASource.csproj" /></ItemGroup>
 </Project>

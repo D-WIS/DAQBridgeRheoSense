@@ -295,3 +295,5 @@ an interval shorter than the PLC heartbeat dwell time so alternating states are
 observed. The server requires OPC Foundation client 2.2.54 for this setting.
 
 The query lifecycle dependency release uses OPC Foundation client 2.2.55 (directly or through mechanical bridge 1.0.6) and Common.Worker 1.0.8 where applicable. Repeated query registrations are deduplicated and released when their session closes. Existing configuration and persistent volumes are preserved.
+
+The OPC-UA simulator now retries unavailable startup endpoints and reconnects after outages, re-registering variables and restoring current values without a container restart. `ConnectionRetryInterval` defaults to five seconds in `config.json`; see [source connection recovery](DWIS.DAQBridge.RheoSense.OPCUASource/README.md#connection-recovery).
